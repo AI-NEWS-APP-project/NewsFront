@@ -21,5 +21,19 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['../*', './*'],
+              message:
+                'Relative imports are not allowed. Please use path aliases (@app, @features, @pages, @shared) instead.',
+            },
+          ],
+        },
+      ],
+    },
   },
 ])
