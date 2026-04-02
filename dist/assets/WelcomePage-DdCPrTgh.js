@@ -1,1 +1,0 @@
-import{t as e}from"./index-DzB1-UmA.js";var t=e(),n=()=>(0,t.jsxs)(`div`,{children:[(0,t.jsx)(`h1`,{children:`Welcome Page`}),(0,t.jsx)(`p`,{children:`서비스 소개 및 랜딩 페이지`})]});export{n as default};
