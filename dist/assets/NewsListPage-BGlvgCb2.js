@@ -1,1 +1,0 @@
-import{t as e}from"./index-DzB1-UmA.js";var t=e(),n=()=>(0,t.jsx)(`div`,{children:(0,t.jsx)(`h1`,{children:`News List Page`})});export{n as default};
