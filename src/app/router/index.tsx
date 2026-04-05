@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { Navigate, createBrowserRouter } from 'react-router-dom'
 
 export const router = createBrowserRouter([
   {
@@ -37,18 +37,27 @@ export const router = createBrowserRouter([
     },
   },
   {
-    path: '/keyword',
-    lazy: async () => {
-      const { default: KeywordPage } = await import('@pages/KeywordPage')
-      return { Component: KeywordPage }
-    },
-  },
-  {
-    path: '/alarm',
-    lazy: async () => {
-      const { default: AlarmPage } = await import('@pages/AlarmPage')
-      return { Component: AlarmPage }
-    },
+    path: '/setting',
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/setting/alarm" replace />,
+      },
+      {
+        path: 'keyword',
+        lazy: async () => {
+          const { default: KeywordPage } = await import('@pages/KeywordPage')
+          return { Component: KeywordPage }
+        },
+      },
+      {
+        path: 'alarm',
+        lazy: async () => {
+          const { default: AlarmPage } = await import('@pages/AlarmPage')
+          return { Component: AlarmPage }
+        },
+      },
+    ],
   },
   {
     path: '/news',
