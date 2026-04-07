@@ -14,7 +14,10 @@ const NAME_ICON = <UserIcon className="size-4.5 text-[#5A6A85]" />
 const EMAIL_ICON = <MailIcon className="size-4.5 text-[#5A6A85]" />
 const PASSWORD_ICON = <LockIcon className="size-4.5 text-[#5A6A85]" />
 const PASSWORD_MATCH_ICON = (
-  <CheckIcon className="size-4 text-[#5A6A85] opacity-60" aria-label="비밀번호 일치" />
+  <CheckIcon
+    className="size-4 text-[#5A6A85] opacity-60"
+    aria-label="비밀번호 일치"
+  />
 )
 
 interface SignupFieldConfig {
@@ -94,7 +97,9 @@ function SignupPage() {
                   required
                   error={errors[field.id]}
                   {...(field.id === 'confirmPassword' && {
-                    endAdornment: isPasswordMatched ? PASSWORD_MATCH_ICON : null,
+                    endAdornment: isPasswordMatched
+                      ? PASSWORD_MATCH_ICON
+                      : null,
                   })}
                 />
               ))}
