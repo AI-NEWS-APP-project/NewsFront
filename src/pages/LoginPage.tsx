@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@features/auth/model/useAuthStore'
 import { verifyRegisteredUser } from '@features/auth/model/localAuth'
-import mailIcon from '@shared/assets/mail.png'
-import lockIcon from '@shared/assets/lock.png'
+import { LockIcon, MailIcon } from '@shared/assets/icons'
 import Header from '@shared/components/header'
 import Button from '@shared/components/Button'
 import Input from '@shared/components/Input'
@@ -58,7 +57,7 @@ function LoginPage() {
             <form onSubmit={handleLogin} className="space-y-5">
               <Input
                 label="이메일"
-                icon={mailIcon}
+                icon={<MailIcon className="size-4.5 text-[#5A6A85]" />}
                 type="email"
                 placeholder="example@email.com"
                 value={email}
@@ -70,7 +69,7 @@ function LoginPage() {
               />
               <Input
                 label="비밀번호"
-                icon={lockIcon}
+                icon={<LockIcon className="size-4.5 text-[#5A6A85]" />}
                 type="password"
                 placeholder="••••••••"
                 value={password}

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import alarmIcon from '@shared/assets/alarm.png'
-import userIcon from '@shared/assets/user.png'
+import { AlarmIcon, UserIcon } from '@shared/assets/icons'
 import Button from './Button'
 
 export default function Header() {
@@ -50,10 +49,9 @@ export default function Header() {
               onClick={() => setNotificationOpen(true)}
               className="group relative rounded-full p-2 transition-colors hover:bg-gray-50"
             >
-              <img
-                src={alarmIcon}
-                alt="알림"
-                className="size-6 text-[#5A6A85] group-hover:text-[#7899C5]"
+              <AlarmIcon
+                aria-label="알림"
+                className="size-6 text-[#5A6A85] transition-colors group-hover:text-[#7899C5]"
               />
               <div className="absolute top-1.5 right-1.5 flex size-4 items-center justify-center rounded-full border-2 border-white bg-[#7899C5]">
                 <span className="text-[9px] leading-none font-bold text-white">
@@ -63,7 +61,7 @@ export default function Header() {
             </div>
             <Link to="/setting/alarm">
               <div className="flex size-10 items-center justify-center rounded-xl bg-[#7899C5] shadow-sm transition-all hover:bg-[#6688B3]">
-                <img src={userIcon} className="size-5 text-white" />
+                <UserIcon className="size-5 text-white" aria-hidden="true" />
               </div>
             </Link>
           </div>

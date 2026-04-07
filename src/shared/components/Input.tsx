@@ -3,7 +3,7 @@ import { cn } from '@shared/lib/utils'
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: ReactNode
-  icon?: string
+  icon?: ReactNode
   error?: ReactNode
   endAdornment?: ReactNode
   headerAction?: ReactNode
@@ -47,12 +47,11 @@ export default function Input({
 
       <div className="relative">
         {icon && (
-          <img
-            src={icon}
-            alt=""
-            className="absolute top-1/2 left-4 size-4.5 -translate-y-1/2 opacity-60"
-          />
+          <div className="absolute top-1/2 left-4 -translate-y-1/2 opacity-60">
+            {icon}
+          </div>
         )}
+
         <input className={inputVariants} {...props} />
         {endAdornment && (
           <div className="absolute top-1/2 right-4 -translate-y-1/2">

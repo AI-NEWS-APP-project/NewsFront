@@ -7,10 +7,7 @@ import {
   type SignupFieldId,
 } from '@features/auth/model/useSignupForm'
 import { saveRegisteredUser } from '@features/auth/model/localAuth'
-import lockIcon from '@shared/assets/lock.png'
-import mailIcon from '@shared/assets/mail.png'
-import userIcon from '@shared/assets/user2.png'
-import checkIcon from '@shared/assets/check.png'
+import { CheckIcon, LockIcon, MailIcon, UserIcon } from '@shared/assets/icons'
 
 const SIGNUP_FIELDS = [
   {
@@ -18,28 +15,28 @@ const SIGNUP_FIELDS = [
     label: '이름',
     type: 'text',
     placeholder: '홍길동',
-    icon: userIcon,
+    icon: <UserIcon className="size-4.5 text-[#5A6A85]" />,
   },
   {
     id: 'email',
     label: '이메일 주소',
     type: 'email',
     placeholder: 'example@email.com',
-    icon: mailIcon,
+    icon: <MailIcon className="size-4.5 text-[#5A6A85]" />,
   },
   {
     id: 'password',
     label: '비밀번호',
     type: 'password',
     placeholder: '8자 이상 입력',
-    icon: lockIcon,
+    icon: <LockIcon className="size-4.5 text-[#5A6A85]" />,
   },
   {
     id: 'confirmPassword',
     label: '비밀번호 확인',
     type: 'password',
     placeholder: '한 번 더 입력',
-    icon: lockIcon,
+    icon: <LockIcon className="size-4.5 text-[#5A6A85]" />,
   },
 ] as const
 
@@ -83,10 +80,9 @@ function SignupPage() {
                   error={errors[field.id as SignupFieldId]}
                   {...(field.id === 'confirmPassword' && {
                     endAdornment: isPasswordMatched ? (
-                      <img
-                        src={checkIcon}
-                        alt="비밀번호 일치"
-                        className="size-4 opacity-60"
+                      <CheckIcon
+                        className="size-4 text-[#5A6A85] opacity-60"
+                        aria-label="비밀번호 일치"
                       />
                     ) : null,
                   })}
