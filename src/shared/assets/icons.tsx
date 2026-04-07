@@ -101,3 +101,14 @@ export function CheckIcon(props: IconProps) {
     </svg>
   )
 }
+
+export function KakaoIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <path
+        d="M12 4.5c-4.7 0-8.5 2.99-8.5 6.68 0 2.39 1.58 4.49 3.95 5.67l-.8 2.95a.37.37 0 0 0 .56.41l3.54-2.35c.41.04.83.07 1.25.07 4.7 0 8.5-2.99 8.5-6.75S16.7 4.5 12 4.5Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
