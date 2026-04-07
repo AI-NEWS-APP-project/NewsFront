@@ -1,3 +1,4 @@
+import type { HTMLInputTypeAttribute, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '@shared/components/header'
 import Button from '@shared/components/Button'
@@ -9,36 +10,51 @@ import {
 import { saveRegisteredUser } from '@features/auth/model/localAuth'
 import { CheckIcon, LockIcon, MailIcon, UserIcon } from '@shared/assets/icons'
 
-const SIGNUP_FIELDS = [
+const NAME_ICON = <UserIcon className="size-4.5 text-[#5A6A85]" />
+const EMAIL_ICON = <MailIcon className="size-4.5 text-[#5A6A85]" />
+const PASSWORD_ICON = <LockIcon className="size-4.5 text-[#5A6A85]" />
+const PASSWORD_MATCH_ICON = (
+  <CheckIcon className="size-4 text-[#5A6A85] opacity-60" aria-label="비밀번호 일치" />
+)
+
+interface SignupFieldConfig {
+  id: SignupFieldId
+  label: string
+  type: HTMLInputTypeAttribute
+  placeholder: string
+  icon: ReactNode
+}
+
+const SIGNUP_FIELDS: SignupFieldConfig[] = [
   {
     id: 'name',
     label: '이름',
     type: 'text',
     placeholder: '홍길동',
-    icon: <UserIcon className="size-4.5 text-[#5A6A85]" />,
+    icon: NAME_ICON,
   },
   {
     id: 'email',
     label: '이메일 주소',
     type: 'email',
     placeholder: 'example@email.com',
-    icon: <MailIcon className="size-4.5 text-[#5A6A85]" />,
+    icon: EMAIL_ICON,
   },
   {
     id: 'password',
     label: '비밀번호',
     type: 'password',
     placeholder: '8자 이상 입력',
-    icon: <LockIcon className="size-4.5 text-[#5A6A85]" />,
+    icon: PASSWORD_ICON,
   },
   {
     id: 'confirmPassword',
     label: '비밀번호 확인',
     type: 'password',
     placeholder: '한 번 더 입력',
-    icon: <LockIcon className="size-4.5 text-[#5A6A85]" />,
+    icon: PASSWORD_ICON,
   },
-] as const
+]
 
 function SignupPage() {
   const navigate = useNavigate()
@@ -70,21 +86,15 @@ function SignupPage() {
                   key={field.id}
                   label={field.label}
                   icon={field.icon}
+                  name={field.id}
                   type={field.type}
                   placeholder={field.placeholder}
-                  value={formData[field.id as SignupFieldId]}
-                  onChange={e =>
-                    handleChange(field.id as SignupFieldId, e.target.value)
-                  }
+                  value={formData[field.id]}
+                  onChange={e => handleChange(field.id, e.target.value)}
                   required
-                  error={errors[field.id as SignupFieldId]}
+                  error={errors[field.id]}
                   {...(field.id === 'confirmPassword' && {
-                    endAdornment: isPasswordMatched ? (
-                      <CheckIcon
-                        className="size-4 text-[#5A6A85] opacity-60"
-                        aria-label="비밀번호 일치"
-                      />
-                    ) : null,
+                    endAdornment: isPasswordMatched ? PASSWORD_MATCH_ICON : null,
                   })}
                 />
               ))}

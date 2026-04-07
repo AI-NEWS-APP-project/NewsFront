@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, ReactNode } from 'react'
+import { memo, type InputHTMLAttributes, type ReactNode } from 'react'
 import { cn } from '@shared/lib/utils'
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -10,7 +10,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   wrapperClassName?: string
 }
 
-export default function Input({
+const Input = memo(function Input({
   label,
   icon,
   error,
@@ -67,4 +67,6 @@ export default function Input({
       )}
     </div>
   )
-}
+})
+
+export default Input

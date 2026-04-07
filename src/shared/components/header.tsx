@@ -1,10 +1,18 @@
-import { useState, useEffect } from 'react'
+import { memo, useCallback, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { AlarmIcon, UserIcon } from '@shared/assets/icons'
 import Button from './Button'
 
-export default function Header() {
+const Header = memo(function Header() {
   const [notificationOpen, setNotificationOpen] = useState(false)
+
+  const openNotification = useCallback(() => {
+    setNotificationOpen(true)
+  }, [])
+
+  const closeNotification = useCallback(() => {
+    setNotificationOpen(false)
+  }, [])
 
   useEffect(() => {
     if (notificationOpen) document.body.style.overflow = 'hidden'
@@ -46,7 +54,7 @@ export default function Header() {
 
           <div className="flex items-center gap-4">
             <div
-              onClick={() => setNotificationOpen(true)}
+              onClick={openNotification}
               className="group relative rounded-full p-2 transition-colors hover:bg-gray-50"
             >
               <AlarmIcon
@@ -71,7 +79,7 @@ export default function Header() {
       {notificationOpen && (
         <div
           className="fixed inset-0 z-60 bg-black/10 backdrop-blur-[2px]"
-          onClick={() => setNotificationOpen(false)}
+          onClick={closeNotification}
         />
       )}
 
@@ -82,7 +90,7 @@ export default function Header() {
           <div className="flex items-center justify-between border-b border-gray-100 p-6">
             <div className="text-lg font-bold text-[#2C3E50]">알림</div>
             <div
-              onClick={() => setNotificationOpen(false)}
+              onClick={closeNotification}
               className="rounded-md p-1.5 hover:bg-gray-100"
             >
               <div className="size-5 text-gray-400">x</div>
@@ -99,4 +107,6 @@ export default function Header() {
       <div className="h-17.5" />
     </>
   )
-}
+})
+
+export default Header

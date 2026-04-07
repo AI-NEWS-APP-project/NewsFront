@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@features/auth/model/useAuthStore'
 import { verifyRegisteredUser } from '@features/auth/model/localAuth'
@@ -7,12 +7,31 @@ import Header from '@shared/components/header'
 import Button from '@shared/components/Button'
 import Input from '@shared/components/Input'
 
+const EMAIL_ICON = <MailIcon className="size-4.5 text-[#5A6A85]" />
+const PASSWORD_ICON = <LockIcon className="size-4.5 text-[#5A6A85]" />
+
 function LoginPage() {
   const navigate = useNavigate()
   const setAuth = useAuthStore(state => state.setAuth)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
+
+  const handleEmailChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setEmail(e.target.value)
+      setLoginError('')
+    },
+    []
+  )
+
+  const handlePasswordChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setPassword(e.target.value)
+      setLoginError('')
+    },
+    []
+  )
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,26 +76,20 @@ function LoginPage() {
             <form onSubmit={handleLogin} className="space-y-5">
               <Input
                 label="이메일"
-                icon={<MailIcon className="size-4.5 text-[#5A6A85]" />}
+                icon={EMAIL_ICON}
                 type="email"
                 placeholder="example@email.com"
                 value={email}
-                onChange={e => {
-                  setEmail(e.target.value)
-                  setLoginError('')
-                }}
+                onChange={handleEmailChange}
                 required
               />
               <Input
                 label="비밀번호"
-                icon={<LockIcon className="size-4.5 text-[#5A6A85]" />}
+                icon={PASSWORD_ICON}
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onChange={e => {
-                  setPassword(e.target.value)
-                  setLoginError('')
-                }}
+                onChange={handlePasswordChange}
                 error={loginError}
                 required
               />

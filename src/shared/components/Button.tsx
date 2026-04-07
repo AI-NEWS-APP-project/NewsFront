@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import { memo, type ButtonHTMLAttributes, type ReactNode } from 'react'
 import { cn } from '@shared/lib/utils'
 
 // 1. 스타일 변수를 컴포넌트 외부 상단에 배치
@@ -16,7 +16,7 @@ interface AuthButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: AuthVariantType // 위에서 정의한 타입 사용
 }
 
-export default function Button({
+const Button = memo(function Button({
   children,
   className,
   type = 'button',
@@ -39,4 +39,6 @@ export default function Button({
       {children}
     </button>
   )
-}
+})
+
+export default Button
