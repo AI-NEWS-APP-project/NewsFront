@@ -112,3 +112,140 @@ export function KakaoIcon(props: IconProps) {
     </svg>
   )
 }
+
+export function SparklesIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <path
+        d="m12 3 1.52 4.48L18 9l-4.48 1.52L12 15l-1.52-4.48L6 9l4.48-1.52L12 3Z"
+        fill="currentColor"
+      />
+      <path
+        d="m18.5 15 .75 2.25L21.5 18l-2.25.75L18.5 21l-.75-2.25L15.5 18l2.25-.75.75-2.25Z"
+        fill="currentColor"
+      />
+      <path
+        d="m5.5 14 .9 2.6L9 17.5l-2.6.9L5.5 21l-.9-2.6L2 17.5l2.6-.9.9-2.6Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
+export function ZapIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <path
+        d="M13 2 5.5 13h4.75L11 22l7.5-11H13z"
+        fill="currentColor"
+        stroke="currentColor"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+export function TrendingUpIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <path
+        d="M4 16.5 10 10.5l4 4L20 8.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M15.5 8.5H20v4.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+export function NewsSummaryIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <rect
+        x="3.5"
+        y="4.5"
+        width="17"
+        height="15"
+        rx="3"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M7.5 9h4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7.5 12.25h9"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7.5 15.5h6.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="m16.25 7.5.58 1.67 1.67.58-1.67.58-.58 1.67-.58-1.67-1.67-.58 1.67-.58.58-1.67Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
+export function KeywordClusterIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <circle
+        cx="7.5"
+        cy="8"
+        r="2.25"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <circle
+        cx="16.5"
+        cy="7.5"
+        r="2.25"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <circle
+        cx="12"
+        cy="16.25"
+        r="2.75"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M9.5 9.2 10.8 11"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M14.45 9.3 13.1 11.05"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M14.55 16.25h3.2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
