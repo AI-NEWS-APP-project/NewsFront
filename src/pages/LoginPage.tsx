@@ -6,6 +6,7 @@ import { KakaoIcon, LockIcon, MailIcon } from '@shared/assets/icons'
 import Header from '@shared/components/header'
 import Button from '@shared/components/Button'
 import Input from '@shared/components/Input'
+import Footer from '@shared/components/Footer'
 
 const EMAIL_ICON = <MailIcon className="size-4.5 text-[#5A6A85]" />
 const PASSWORD_ICON = <LockIcon className="size-4.5 text-[#5A6A85]" />
@@ -139,6 +140,7 @@ function LoginPage() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   )
 }
