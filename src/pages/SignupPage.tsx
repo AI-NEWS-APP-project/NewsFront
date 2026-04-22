@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import Header from '@shared/components/header'
 import Button from '@shared/components/Button'
 import Input from '@shared/components/Input'
+import { signup, getSignupErrorMessage } from '@features/auth/api/signup'
+import { saveSignupName } from '@features/auth/model/signupProfile'
 import {
   useSignupForm,
   type SignupFieldId,
 } from '@features/auth/model/useSignupForm'
-import { saveRegisteredUser } from '@features/auth/model/localAuth'
 import { CheckIcon, LockIcon, MailIcon, UserIcon } from '@shared/assets/icons'
 
 const NAME_ICON = <UserIcon className="size-4.5 text-[#5A6A85]" />
@@ -61,13 +62,29 @@ const SIGNUP_FIELDS: SignupFieldConfig[] = [
 
 function SignupPage() {
   const navigate = useNavigate()
-  const { formData, errors, isPasswordMatched, handleChange, handleSubmit } =
-    useSignupForm({
-      onSubmitSuccess: nextFormData => {
-        saveRegisteredUser(nextFormData)
-        navigate('/login')
-      },
-    })
+  const {
+    formData,
+    errors,
+    submitError,
+    isSubmitting,
+    isPasswordMatched,
+    handleChange,
+    handleSubmit,
+  } = useSignupForm({
+    onSubmitSuccess: async nextFormData => {
+      try {
+        await signup({
+          email: nextFormData.email,
+          password: nextFormData.password,
+        })
+        saveSignupName(nextFormData.name)
+      } catch (error) {
+        throw new Error(getSignupErrorMessage(error))
+      }
+
+      navigate('/login')
+    },
+  })
 
   return (
     <div className="min-h-screen bg-[#F8FBFD] font-sans text-black">
@@ -103,8 +120,17 @@ function SignupPage() {
                   })}
                 />
               ))}
-              <Button type="submit" className="mt-4 text-[16px]">
-                회원가입
+              {submitError ? (
+                <p className="text-[13px] font-medium text-red-500">
+                  {submitError}
+                </p>
+              ) : null}
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="mt-4 text-[16px] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? '가입 중...' : '회원가입'}
               </Button>
             </form>
             <div className="mt-3 text-[14px] text-[#5A6A85]">

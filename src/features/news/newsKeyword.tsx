@@ -1,14 +1,7 @@
 import { Link } from 'react-router-dom'
+import type { KeywordNewsGroup } from '@features/news/model/types'
 
-export default function NewsKeyword({
-  group,
-}: {
-  group: {
-    keyword: string
-    count: number
-    news: { id: number; title: string; date: string }[]
-  }
-}) {
+export default function NewsKeyword({ group }: { group: KeywordNewsGroup }) {
   return (
     <div className="rounded-xl border border-sky-700/20 bg-white p-5 text-left hover:shadow-md">
       <div className="mb-4 flex items-center gap-2">
@@ -19,7 +12,7 @@ export default function NewsKeyword({
       </div>
 
       <div className="mb-4 space-y-2">
-        {group.news.map((item: { id: number; title: string; date: string }) => (
+        {group.news.map(item => (
           <Link key={item.id} to={`/news/${item.id}`}>
             <div className="rounded-lg border border-sky-700/10 bg-[#F8FBFD] p-3 text-left hover:bg-[#E8F1F8]">
               <p className="line-clamp-2 text-xs font-medium">{item.title}</p>

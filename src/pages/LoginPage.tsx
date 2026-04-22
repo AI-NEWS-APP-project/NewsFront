@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { getAuthErrorMessage, login } from '@features/auth/api/auth'
 import {
   loginWithSocial,
   type SocialProvider,
 } from '@features/auth/api/socialAuth'
+import { getSignupName } from '@features/auth/model/signupProfile'
 import { useAuthStore } from '@features/auth/model/useAuthStore'
-import { verifyRegisteredUser } from '@features/auth/model/localAuth'
 import { GoogleIcon, KakaoIcon, LockIcon, MailIcon } from '@shared/assets/icons'
 import Button from '@shared/components/Button'
 import Footer from '@shared/components/Footer'
@@ -25,8 +26,13 @@ function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [socialLoginProvider, setSocialLoginProvider] =
     useState<SocialProvider | null>(null)
+
+  const resolveUserName = useCallback((name?: string, userEmail?: string) => {
+    return name || getSignupName() || userEmail?.split('@')[0] || '사용자'
+  }, [])
 
   const handleEmailChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,7 +78,7 @@ function LoginPage() {
           {
             id: user.id,
             email: user.email,
-            name: user.name || user.email.split('@')[0],
+            name: resolveUserName(user.name, user.email),
             globalPushEnabled: user.globalPushEnabled,
             createdAt: user.createdAt,
           },
@@ -87,7 +93,7 @@ function LoginPage() {
         setSocialLoginProvider(null)
       }
     },
-    [navigate, setAuth]
+    [navigate, resolveUserName, setAuth]
   )
 
   const triggerGoogleLogin = useGoogleLogin({
@@ -131,28 +137,51 @@ function LoginPage() {
     })
   }
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const registeredUser = verifyRegisteredUser(email, password)
-
-    if (!registeredUser) {
-      setLoginError('회원가입한 이메일 또는 비밀번호가 일치하지 않습니다.')
-      return
-    }
-
     setLoginError('')
-    setAuth(
-      {
-        id: registeredUser.id,
-        email: registeredUser.email,
-        name: registeredUser.name,
-      },
-      `local-access-token-${registeredUser.id}`,
-      `local-refresh-token-${registeredUser.id}`
-    )
+    setIsSubmitting(true)
 
-    navigate('/dashboard')
+    try {
+      const result = await login({
+        email,
+        password,
+        fcmToken: 'fcm-token-abc-123',
+      })
+
+      if (result.success === false) {
+        throw new Error(
+          result.message || '이메일 또는 비밀번호를 다시 확인해 주세요.'
+        )
+      }
+
+      const { accessToken, refreshToken, user } = result.data
+      setAuth(
+        {
+          id: user.id,
+          email: user.email,
+          name: resolveUserName(user.name, user.email),
+          globalPushEnabled: user.globalPushEnabled,
+          createdAt: user.createdAt,
+        },
+        accessToken,
+        refreshToken
+      )
+
+      navigate('/dashboard')
+    } catch (error) {
+      setLoginError(
+        error instanceof Error
+          ? error.message
+          : getAuthErrorMessage(
+              error,
+              '로그인 중 문제가 발생했습니다. 다시 시도해 주세요.'
+            )
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -193,9 +222,10 @@ function LoginPage() {
               />
               <Button
                 type="submit"
+                disabled={isSubmitting || socialLoginProvider !== null}
                 className="mt-4 h-12 rounded-xl text-[16px] shadow-[0_6px_16px_rgba(120,153,197,0.28)]"
               >
-                로그인
+                {isSubmitting ? '로그인 중...' : '로그인'}
               </Button>
             </form>
 

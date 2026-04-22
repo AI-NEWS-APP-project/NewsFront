@@ -272,3 +272,24 @@ export function KeywordClusterIcon(props: IconProps) {
     </svg>
   )
 }
+
+export function GridIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <rect x="4" y="4" width="6" height="6" rx="1.5" fill="currentColor" />
+      <rect x="14" y="4" width="6" height="6" rx="1.5" fill="currentColor" />
+      <rect x="4" y="14" width="6" height="6" rx="1.5" fill="currentColor" />
+      <rect x="14" y="14" width="6" height="6" rx="1.5" fill="currentColor" />
+    </svg>
+  )
+}
+
+export function ListIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <rect x="4" y="5" width="16" height="3" rx="1.5" fill="currentColor" />
+      <rect x="4" y="10.5" width="16" height="3" rx="1.5" fill="currentColor" />
+      <rect x="4" y="16" width="16" height="3" rx="1.5" fill="currentColor" />
+    </svg>
+  )
+}

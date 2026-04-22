@@ -1,24 +1,21 @@
 import { KeywordClusterIcon, NewsSummaryIcon } from '@shared/assets/icons'
 import { MOCK_AI_NEWS, MOCK_KEYWORD_NEWS } from '@features/news/mock/newsMock'
+import { useAuthStore } from '@features/auth/model/useAuthStore'
 import NewsCard from '@features/news/newsCard'
 import NewsKeyword from '@features/news/newsKeyword'
 import Header from '@shared/components/header'
 import Footer from '@shared/components/Footer'
 
-const user = {
-  id: 1,
-  name: '홍길동',
-  email: 'hong@example.com',
-}
-
 function DashboardPage() {
+  const user = useAuthStore(state => state.user)
+
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <Header />
       <main className="mx-auto max-w-7xl px-8 pt-20 pb-12">
         <div className="mb-12 text-left">
           <div className="mb-2 text-4xl font-bold text-[#1E293B]">
-            안녕하세요 {user.name}님👋
+            안녕하세요 {user?.name ?? '사용자'}님👋
           </div>
           <p className="text-base text-[#64748B]">
             오늘의 주요 뉴스를 확인해보세요

@@ -1,10 +1,16 @@
 import { memo, useCallback, useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { getAuthErrorMessage, logout } from '@features/auth/api/auth'
+import { useAuthStore } from '@features/auth/model/useAuthStore'
 import { AlarmIcon, UserIcon } from '@shared/assets/icons'
 import Button from './Button'
 
 const Header = memo(function Header() {
+  const navigate = useNavigate()
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated)
+  const clearAuth = useAuthStore(state => state.clearAuth)
   const [notificationOpen, setNotificationOpen] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const openNotification = useCallback(() => {
     setNotificationOpen(true)
@@ -18,6 +24,26 @@ const Header = memo(function Header() {
     if (notificationOpen) document.body.style.overflow = 'hidden'
     else document.body.style.overflow = 'unset'
   }, [notificationOpen])
+
+  const handleLogout = useCallback(async () => {
+    const refreshToken = localStorage.getItem('refreshToken')
+
+    setIsLoggingOut(true)
+
+    try {
+      if (refreshToken) {
+        await logout(refreshToken)
+      }
+    } catch (error) {
+      console.error(
+        getAuthErrorMessage(error, '로그아웃 요청 중 문제가 발생했습니다.')
+      )
+    } finally {
+      clearAuth()
+      setIsLoggingOut(false)
+      navigate('/login')
+    }
+  }, [clearAuth, navigate])
 
   return (
     <>
@@ -53,6 +79,17 @@ const Header = memo(function Header() {
           </div>
 
           <div className="flex items-center gap-4">
+            {isAuthenticated ? (
+              <Button
+                type="button"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                variant="secondary"
+                className="h-10 w-auto rounded-xl border border-[#D9E5F3] px-4 text-sm font-semibold text-[#4A678C] disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
+              </Button>
+            ) : null}
             <div
               onClick={openNotification}
               className="group relative rounded-full p-2 transition-colors hover:bg-gray-50"

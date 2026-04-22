@@ -5,8 +5,7 @@ export type SignupFormData = Record<SignupFieldId, string>
 type SignupFieldErrors = Partial<Record<SignupFieldId, string>>
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const PASSWORD_REGEX =
-  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()[\]{}\-_=+\\|;:'",.<>/?`~]).{8,}$/
+const PASSWORD_MIN_LENGTH = 8
 
 const FIELD_LABELS: Record<SignupFieldId, string> = {
   name: '이름',
@@ -23,13 +22,15 @@ const INITIAL_FORM_DATA: SignupFormData = {
 }
 
 interface UseSignupFormOptions {
-  onSubmitSuccess: (formData: SignupFormData) => void
+  onSubmitSuccess: (formData: SignupFormData) => Promise<void> | void
 }
 
 export function useSignupForm({ onSubmitSuccess }: UseSignupFormOptions) {
   const [formData, setFormData] = useState<SignupFormData>(INITIAL_FORM_DATA)
   const [errors, setErrors] = useState<SignupFieldErrors>({})
   const [hasSubmitted, setHasSubmitted] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const validateField = (
     field: SignupFieldId,
@@ -45,8 +46,8 @@ export function useSignupForm({ onSubmitSuccess }: UseSignupFormOptions) {
       return '올바른 이메일 형식을 입력해 주세요.'
     }
 
-    if (field === 'password' && !PASSWORD_REGEX.test(value)) {
-      return '비밀번호는 8자 이상이며 영문,숫자,특수문자를 포함해야 합니다.'
+    if (field === 'password' && value.length < PASSWORD_MIN_LENGTH) {
+      return '비밀번호는 8자 이상이어야 합니다.'
     }
 
     if (
@@ -81,6 +82,9 @@ export function useSignupForm({ onSubmitSuccess }: UseSignupFormOptions) {
   const handleChange = (field: SignupFieldId, value: string) => {
     const nextFormData = { ...formData, [field]: value }
     setFormData(nextFormData)
+    if (submitError) {
+      setSubmitError('')
+    }
 
     if (!hasSubmitted) {
       return
@@ -109,9 +113,10 @@ export function useSignupForm({ onSubmitSuccess }: UseSignupFormOptions) {
     })
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setHasSubmitted(true)
+    setSubmitError('')
 
     const nextErrors = validateForm(formData)
     setErrors(nextErrors)
@@ -120,7 +125,18 @@ export function useSignupForm({ onSubmitSuccess }: UseSignupFormOptions) {
       return
     }
 
-    onSubmitSuccess(formData)
+    try {
+      setIsSubmitting(true)
+      await onSubmitSuccess(formData)
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : '회원가입 중 문제가 발생했습니다. 다시 시도해 주세요.'
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const isPasswordMatched =
@@ -131,6 +147,8 @@ export function useSignupForm({ onSubmitSuccess }: UseSignupFormOptions) {
   return {
     formData,
     errors,
+    submitError,
+    isSubmitting,
     isPasswordMatched,
     handleChange,
     handleSubmit,

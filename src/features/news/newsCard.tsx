@@ -1,13 +1,7 @@
 import { Link } from 'react-router-dom'
+import type { NewsItem } from '@features/news/model/types'
 
-export interface News {
-  id: number
-  keyword: string
-  title: string
-  time: string
-  date: string
-}
-export default function NewsCard({ news }: { news: News }) {
+export default function NewsCard({ news }: { news: NewsItem }) {
   return (
     <Link to={`/news/${news.id}`}>
       <div className="group flex h-48 flex-col rounded-xl border border-sky-700/20 bg-white p-4 text-left hover:shadow-md">
