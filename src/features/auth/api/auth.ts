@@ -40,7 +40,10 @@ export const logout = async (refreshToken: string) => {
   await axiosInstance.post('/auth/logout', requestBody)
 }
 
-export const getAuthErrorMessage = (error: unknown, fallbackMessage: string) => {
+export const getAuthErrorMessage = (
+  error: unknown,
+  fallbackMessage: string
+) => {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError<{ message?: string }>
     return axiosError.response?.data?.message ?? fallbackMessage
