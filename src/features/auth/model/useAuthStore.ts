@@ -1,11 +1,12 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-//TODO: User DB 인터페이스 확정시 변경해야함
-interface User {
-  id: string
+export interface User {
+  id: number | string
   email: string
-  name: string
+  name?: string
+  globalPushEnabled?: boolean
+  createdAt?: string
 }
 
 interface AuthState {
