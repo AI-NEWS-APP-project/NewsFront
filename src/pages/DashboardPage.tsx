@@ -15,7 +15,7 @@ function DashboardPage() {
 
   const currentItems = MOCK_KEYWORD_NEWS.slice(
     currentPage * itemsPerPage,
-    (currentPage + 1) * itemsPerPage,
+    (currentPage + 1) * itemsPerPage
   )
 
   const goToPrevPage = () => {
@@ -66,7 +66,9 @@ function DashboardPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#3D5A80]/10 text-[#3D5A80]">
                 <KeywordClusterIcon className="size-5" />
               </div>
-              <div className="text-2xl font-bold text-[#1E293B]">키워드 뉴스</div>
+              <div className="text-2xl font-bold text-[#1E293B]">
+                키워드 뉴스
+              </div>
             </div>
 
             <div className="flex items-center gap-3 self-end sm:self-auto">
