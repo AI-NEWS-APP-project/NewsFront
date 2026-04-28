@@ -8,6 +8,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   endAdornment?: ReactNode
   headerAction?: ReactNode
   wrapperClassName?: string
+  inputClassName?: string
 }
 
 const Input = memo(function Input({
@@ -18,6 +19,7 @@ const Input = memo(function Input({
   headerAction,
   wrapperClassName,
   className,
+  inputClassName,
   ...props
 }: InputProps) {
   const hasError = !!error
@@ -29,6 +31,7 @@ const Input = memo(function Input({
     hasError
       ? 'border-red-200 bg-red-50/30 focus:border-red-400 focus:ring-4 focus:ring-red-400/10'
       : 'border-gray-200 focus:border-[#7899C5] focus:ring-4 focus:ring-[#7899C5]/10',
+    inputClassName,
     className
   )
 
