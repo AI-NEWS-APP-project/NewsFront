@@ -2,6 +2,7 @@ import type { AxiosRequestConfig } from 'axios'
 import axiosInstance from '@shared/lib/axiosInstance'
 import type { ApiResponse } from '@features/keyword/api/keywords'
 import type {
+  KeywordNewsDetail,
   KeywordNewsHistoryItem,
   LatestKeywordNewsSummary,
 } from '@features/news/model/types'
@@ -39,6 +40,18 @@ export const getKeywordNewsDetail = async <T = unknown>(
   config?: AxiosRequestConfig
 ): Promise<ApiResponse<T>> => {
   const response = await axiosInstance.get<ApiResponse<T>>(
+    `/news/keyword-news/${id}`,
+    config
+  )
+
+  return response.data
+}
+
+export const getKeywordNewsDetailItem = async (
+  id: number | string,
+  config?: AxiosRequestConfig
+): Promise<ApiResponse<KeywordNewsDetail>> => {
+  const response = await axiosInstance.get<ApiResponse<KeywordNewsDetail>>(
     `/news/keyword-news/${id}`,
     config
   )

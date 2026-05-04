@@ -51,3 +51,18 @@ export interface UserKeywordOption {
   id: number
   name: string
 }
+
+export interface KeywordNewsDetailLink {
+  url: string
+  title: string
+}
+
+export interface KeywordNewsDetail {
+  id: number
+  keywordId: number
+  keywordName: string
+  summaryText: string
+  clusterNewsCount: number
+  createdAt: string
+  links: KeywordNewsDetailLink[]
+}

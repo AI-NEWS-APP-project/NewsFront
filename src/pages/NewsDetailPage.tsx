@@ -1,9 +1,8 @@
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SourceArticleList from '@features/news/components/SourceArticleList'
-import {
-  MOCK_NEWS_DETAIL,
-  type NewsDetail,
-} from '@features/news/mock/newsDetailMock'
+import { getKeywordNewsDetailItem } from '@features/news/api/keywordNews'
+import type { KeywordNewsDetail } from '@features/news/model/types'
 import { NewsSummaryIcon } from '@shared/assets/icons'
 import Button from '@shared/components/Button'
 import Footer from '@shared/components/Footer'
@@ -47,20 +46,61 @@ function CalendarGlyph() {
   )
 }
 
-function getNewsDetail(id?: string): NewsDetail {
-  if (id === String(MOCK_NEWS_DETAIL.id)) {
-    return MOCK_NEWS_DETAIL
+function formatDate(createdAt: string) {
+  const createdDate = new Date(createdAt)
+
+  if (Number.isNaN(createdDate.getTime())) {
+    return createdAt
   }
 
-  return {
-    ...MOCK_NEWS_DETAIL,
-    id: Number(id) || MOCK_NEWS_DETAIL.id,
-  }
+  const year = createdDate.getFullYear()
+  const month = String(createdDate.getMonth() + 1).padStart(2, '0')
+  const day = String(createdDate.getDate()).padStart(2, '0')
+
+  return `${year}.${month}.${day}`
 }
 
 export default function NewsDetailPage() {
   const { id } = useParams()
-  const newsDetail = getNewsDetail(id)
+  const [newsDetail, setNewsDetail] = useState<KeywordNewsDetail | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  useEffect(() => {
+    const fetchNewsDetail = async () => {
+      if (!id) {
+        setIsLoading(false)
+        setErrorMessage('뉴스 상세 ID가 올바르지 않습니다.')
+        return
+      }
+
+      setIsLoading(true)
+      setErrorMessage('')
+
+      try {
+        const result = await getKeywordNewsDetailItem(id)
+
+        if (result.success === false || !result.data) {
+          throw new Error(
+            result.message || '뉴스 상세 정보를 불러오지 못했습니다.'
+          )
+        }
+
+        setNewsDetail(result.data)
+      } catch (error) {
+        console.error('뉴스 상세 조회 실패:', error)
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : '뉴스 상세 정보를 불러오지 못했습니다.'
+        )
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void fetchNewsDetail()
+  }, [id])
 
   return (
     <div className="min-h-screen bg-[#F8FBFD]">
@@ -75,58 +115,84 @@ export default function NewsDetailPage() {
           <span className="text-sm font-medium">목록으로</span>
         </Link>
 
-        <section className="rounded-2xl border border-[#E8F1F8] bg-white p-6 shadow-md sm:p-7">
-          <div className="mb-3 flex flex-wrap gap-2">
-            {newsDetail.keywords.map(keyword => (
-              <span
-                key={keyword}
-                className="flex h-6 items-center justify-center rounded-md bg-[#6B9AC4] px-2.5 text-[11px] font-bold text-white"
-              >
-                {keyword}
-              </span>
-            ))}
-          </div>
-
-          <div className="mb-4 text-[24px] leading-tight font-bold text-[#2C3E50] sm:text-[28px]">
-            {newsDetail.title}
-          </div>
-
-          <div className="mb-5 flex flex-wrap items-center gap-4 border-b border-[#E8F1F8] pb-5 text-[#3D5A80]/70">
-            <div className="flex items-center gap-1.5">
-              <CalendarGlyph />
-              <span className="text-xs font-medium">{newsDetail.date}</span>
-            </div>
-            <div className="text-xs font-medium">{newsDetail.source}</div>
-          </div>
-
-          <section className="mb-7 text-left">
-            <div className="mb-3 flex items-center gap-2">
-              <div className="flex size-7 items-center justify-center rounded-lg bg-[#6B9AC4] text-white">
-                <NewsSummaryIcon className="size-3.5" />
-              </div>
-              <div className="text-base font-bold text-[#2C3E50]">AI 요약</div>
-            </div>
-            <div className="rounded-xl border border-[#E8F1F8] bg-[#F8FBFD] p-5">
-              <div className="text-sm leading-7 whitespace-pre-line text-[#2C3E50]">
-                {newsDetail.summary}
-              </div>
-            </div>
+        {isLoading ? (
+          <section className="rounded-2xl border border-[#E8F1F8] bg-white p-6 text-sm text-[#64748B] shadow-md sm:p-7">
+            뉴스 상세 정보를 불러오는 중입니다.
           </section>
-
-          <section className="border-t border-[#E8F1F8] pt-5 text-left">
-            <div className="mb-4 flex items-center justify-between gap-4">
-              <div className="text-base font-bold text-[#2C3E50]">
-                원문 기사
-              </div>
-              <span className="text-xs text-[#3D5A80]/70">
-                {newsDetail.sourceArticles.length}개
+        ) : errorMessage || !newsDetail ? (
+          <section className="rounded-2xl border border-[#F1D5D5] bg-white p-6 text-sm text-[#B45353] shadow-md sm:p-7">
+            {errorMessage || '뉴스 상세 정보를 찾을 수 없습니다.'}
+          </section>
+        ) : (
+          <section className="rounded-2xl border border-[#E8F1F8] bg-white p-6 shadow-md sm:p-7">
+            <div className="mb-3 flex flex-wrap gap-2">
+              <span className="flex h-6 items-center justify-center rounded-md bg-[#6B9AC4] px-2.5 text-[11px] font-bold text-white">
+                {newsDetail.keywordName}
+              </span>
+              <span className="flex h-6 items-center justify-center rounded-md bg-[#E8F1F8] px-2.5 text-[11px] font-bold text-[#6B9AC4]">
+                {newsDetail.clusterNewsCount}개
               </span>
             </div>
-            <div className="max-h-80 overflow-y-auto pr-1">
-              <SourceArticleList articles={newsDetail.sourceArticles} />
+
+            <div className="mb-4 text-[24px] leading-tight font-bold text-[#2C3E50] sm:text-[28px]">
+              {newsDetail.summaryText}
             </div>
+
+            <div className="mb-5 flex flex-wrap items-center gap-4 border-b border-[#E8F1F8] pb-5 text-[#3D5A80]/70">
+              <div className="flex items-center gap-1.5">
+                <CalendarGlyph />
+                <span className="text-xs font-medium">
+                  {formatDate(newsDetail.createdAt)}
+                </span>
+              </div>
+              <div className="text-xs font-medium">
+                {newsDetail.keywordName}
+              </div>
+            </div>
+
+            <section className="mb-7 text-left">
+              <div className="mb-3 flex items-center gap-2">
+                <div className="flex size-7 items-center justify-center rounded-lg bg-[#6B9AC4] text-white">
+                  <NewsSummaryIcon className="size-3.5" />
+                </div>
+                <div className="text-base font-bold text-[#2C3E50]">
+                  AI 요약
+                </div>
+              </div>
+              <div className="rounded-xl border border-[#E8F1F8] bg-[#F8FBFD] p-5">
+                <div className="text-sm leading-7 whitespace-pre-line text-[#2C3E50]">
+                  {newsDetail.summaryText}
+                </div>
+              </div>
+            </section>
+
+            <section className="border-t border-[#E8F1F8] pt-5 text-left">
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <div className="text-base font-bold text-[#2C3E50]">
+                  원문 기사
+                </div>
+                <span className="text-xs text-[#3D5A80]/70">
+                  {newsDetail.links.length}개
+                </span>
+              </div>
+              {newsDetail.links.length > 0 ? (
+                <div className="max-h-80 overflow-y-auto pr-1">
+                  <SourceArticleList
+                    articles={newsDetail.links.map((link, index) => ({
+                      id: index + 1,
+                      title: link.title,
+                      url: link.url,
+                    }))}
+                  />
+                </div>
+              ) : (
+                <div className="rounded-xl bg-[#F8FBFD] px-4 py-6 text-sm text-[#64748B]">
+                  연결된 원문 기사가 없습니다.
+                </div>
+              )}
+            </section>
           </section>
-        </section>
+        )}
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <Button to="/news" type="button" variant="secondary" size="lg">
