@@ -1,9 +1,7 @@
+import SettingsPageContent from '@features/settings/components/SettingsPageContent'
+
 const KeywordPage = () => {
-  return (
-    <div>
-      <h1>Keyword Page</h1>
-    </div>
-  )
+  return <SettingsPageContent activeTab="keyword" />
 }
 
 export default KeywordPage

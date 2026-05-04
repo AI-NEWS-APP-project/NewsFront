@@ -1,0 +1,53 @@
+export interface NewsItem {
+  id: number
+  keyword: string
+  title: string
+  time: string
+  date: string
+}
+
+export interface KeywordNewsItem {
+  id: number
+  title: string
+  date: string
+}
+
+export interface KeywordNewsGroup {
+  keyword: string
+  count: number
+  news: KeywordNewsItem[]
+}
+
+export interface LatestKeywordNewsSummary {
+  id: number
+  keywordId: number
+  keywordName: string
+  summaryText: string
+  clusterNewsCount: number
+  createdAt: string
+}
+
+export interface KeywordNewsHistoryItem {
+  id: number
+  keywordId?: number
+  keywordName: string
+  summaryText: string
+  clusterNewsCount?: number
+  createdAt: string
+}
+
+export interface KeywordNewsPageResponse {
+  content: KeywordNewsHistoryItem[]
+  totalPages?: number
+  totalElements?: number
+  size?: number
+  number?: number
+  first?: boolean
+  last?: boolean
+  empty?: boolean
+}
+
+export interface UserKeywordOption {
+  id: number
+  name: string
+}
