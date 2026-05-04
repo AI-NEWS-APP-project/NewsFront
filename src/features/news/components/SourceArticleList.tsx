@@ -1,4 +1,10 @@
-import type { SourceArticle } from '@features/news/mock/newsDetailMock'
+interface SourceArticle {
+  id: number
+  title: string
+  url: string
+  source?: string
+  date?: string
+}
 
 function ExternalLinkGlyph() {
   return (
@@ -42,11 +48,13 @@ export default function SourceArticleList({
                 <div className="mb-1 line-clamp-2 text-sm font-medium text-[#2C3E50] transition-colors group-hover:text-[#6B9AC4]">
                   {article.title}
                 </div>
-                <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#3D5A80]/60">
-                  <span>{article.source}</span>
-                  <span>•</span>
-                  <span>{article.date}</span>
-                </div>
+                {article.source || article.date ? (
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#3D5A80]/60">
+                    {article.source ? <span>{article.source}</span> : null}
+                    {article.source && article.date ? <span>•</span> : null}
+                    {article.date ? <span>{article.date}</span> : null}
+                  </div>
+                ) : null}
               </div>
               <div className="mt-0.5 text-[#9AB4CF] transition-colors group-hover:text-[#6B9AC4]">
                 <ExternalLinkGlyph />
