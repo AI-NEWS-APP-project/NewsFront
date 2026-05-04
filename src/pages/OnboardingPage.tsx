@@ -1,6 +1,11 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { createKeywordsBulk } from '@features/keyword/api/keywords'
 import OnboardingKeywordStep from '@features/onboarding/components/OnboardingKeywordStep'
 import OnboardingNotificationStep from '@features/onboarding/components/OnboardingNotificationStep'
+import { useAuthStore } from '@features/auth/model/useAuthStore'
+import { saveNotificationSettings } from '@features/onboarding/model/notificationSettings'
+import { markOnboardingCompleted } from '@features/onboarding/model/onboardingStatus'
 import { useOnboardingState } from '@features/onboarding/model/useOnboardingState'
 import Button from '@shared/components/Button'
 import Footer from '@shared/components/Footer'
@@ -9,9 +14,39 @@ import Header from '@shared/components/header'
 export default function OnboardingPage() {
   const navigate = useNavigate()
   const onboarding = useOnboardingState()
+  const user = useAuthStore(state => state.user)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleComplete = () => {
-    navigate('/dashboard')
+  const handleComplete = async () => {
+    setIsSubmitting(true)
+    saveNotificationSettings({
+      realtime: onboarding.notifications.realtime,
+      dailySummary: onboarding.notifications.dailySummary,
+      summaryTimes: onboarding.summaryTimes,
+    })
+
+    try {
+      if (user && onboarding.selectedKeywords.length > 0) {
+        const result = await createKeywordsBulk({
+          userId: user.id,
+          keywords: onboarding.selectedKeywords,
+        })
+
+        if (result.success === false) {
+          throw new Error(
+            result.message || '키워드 저장 중 문제가 발생했습니다.'
+          )
+        }
+      }
+    } catch (error) {
+      console.error('온보딩 키워드 저장 실패, 로컬 설정만 저장합니다:', error)
+    } finally {
+      if (user) {
+        markOnboardingCompleted(user.id)
+      }
+      setIsSubmitting(false)
+      navigate('/dashboard')
+    }
   }
 
   return (
@@ -106,9 +141,14 @@ export default function OnboardingPage() {
               }
               variant="primary"
               size="lg"
+              disabled={isSubmitting}
               className="h-10 rounded-xl text-[14px]"
             >
-              {onboarding.step === 1 ? '다음' : '완료'}
+              {onboarding.step === 1
+                ? '다음'
+                : isSubmitting
+                  ? '저장 중...'
+                  : '완료'}
             </Button>
           </div>
         </section>

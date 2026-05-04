@@ -8,6 +8,7 @@ import {
 } from '@features/auth/api/socialAuth'
 import { getSignupName } from '@features/auth/model/signupProfile'
 import { useAuthStore } from '@features/auth/model/useAuthStore'
+import { hasCompletedOnboarding } from '@features/onboarding/model/onboardingStatus'
 import { GoogleIcon, KakaoIcon, LockIcon, MailIcon } from '@shared/assets/icons'
 import Button from '@shared/components/Button'
 import Footer from '@shared/components/Footer'
@@ -85,7 +86,7 @@ function LoginPage() {
           accessToken,
           refreshToken
         )
-        navigate('/dashboard')
+        navigate(hasCompletedOnboarding(user.id) ? '/dashboard' : '/onboarding')
       } catch (error) {
         console.error(`${provider} 로그인 실패:`, error)
         setLoginError('소셜 로그인 처리 중 오류가 발생했습니다.')
@@ -169,7 +170,7 @@ function LoginPage() {
         refreshToken
       )
 
-      navigate('/dashboard')
+      navigate(hasCompletedOnboarding(user.id) ? '/dashboard' : '/onboarding')
     } catch (error) {
       setLoginError(
         error instanceof Error

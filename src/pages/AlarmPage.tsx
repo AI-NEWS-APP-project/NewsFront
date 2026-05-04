@@ -1,9 +1,7 @@
+import SettingsPageContent from '@features/settings/components/SettingsPageContent'
+
 const AlarmPage = () => {
-  return (
-    <div>
-      <h1>Alarm Page</h1>
-    </div>
-  )
+  return <SettingsPageContent activeTab="alarm" />
 }
 
 export default AlarmPage

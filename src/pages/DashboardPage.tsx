@@ -1,22 +1,277 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { KeywordClusterIcon, NewsSummaryIcon } from '@shared/assets/icons'
-import { MOCK_AI_NEWS, MOCK_KEYWORD_NEWS } from '@features/news/mock/newsMock'
+import {
+  getKeywordNewsByKeywordId,
+  getLatestKeywordNewsSummaries,
+} from '@features/news/api/keywordNews'
+import type {
+  KeywordNewsGroup,
+  KeywordNewsHistoryItem,
+  KeywordNewsPageResponse,
+  LatestKeywordNewsSummary,
+  NewsItem,
+  UserKeywordOption,
+} from '@features/news/model/types'
+import { getKeywords } from '@features/keyword/api/keywords'
 import { useAuthStore } from '@features/auth/model/useAuthStore'
 import NewsCard from '@features/news/newsCard'
 import NewsKeyword from '@features/news/newsKeyword'
 import Header from '@shared/components/header'
 import Footer from '@shared/components/Footer'
 
+type KeywordResponseItem =
+  | string
+  | {
+      id?: number
+      keywordId?: number
+      name?: string
+      keyword?: string
+      keywordName?: string
+    }
+
+function formatRelativeTime(createdAt: string) {
+  const createdDate = new Date(createdAt)
+
+  if (Number.isNaN(createdDate.getTime())) {
+    return ''
+  }
+
+  const diffMs = Date.now() - createdDate.getTime()
+  const diffMinutes = Math.floor(diffMs / (1000 * 60))
+  const diffHours = Math.floor(diffMinutes / 60)
+  const diffDays = Math.floor(diffHours / 24)
+
+  if (diffMinutes < 1) {
+    return '방금 전'
+  }
+
+  if (diffMinutes < 60) {
+    return `${diffMinutes}분 전`
+  }
+
+  if (diffHours < 24) {
+    return `${diffHours}시간 전`
+  }
+
+  return `${diffDays}일 전`
+}
+
+function formatDate(createdAt: string) {
+  const createdDate = new Date(createdAt)
+
+  if (Number.isNaN(createdDate.getTime())) {
+    return createdAt
+  }
+
+  const year = createdDate.getFullYear()
+  const month = String(createdDate.getMonth() + 1).padStart(2, '0')
+  const day = String(createdDate.getDate()).padStart(2, '0')
+
+  return `${year}.${month}.${day}`
+}
+
+function normalizeKeywords(items?: KeywordResponseItem[]) {
+  if (!Array.isArray(items)) {
+    return []
+  }
+
+  return items
+    .map(item => {
+      if (typeof item === 'string') {
+        return null
+      }
+
+      const id = item.id ?? item.keywordId
+      const name = item.name || item.keywordName || item.keyword
+
+      if (typeof id !== 'number' || !name) {
+        return null
+      }
+
+      return {
+        id,
+        name,
+      }
+    })
+    .filter((keyword): keyword is UserKeywordOption => keyword !== null)
+}
+
+function mapLatestSummaryToNewsItem(
+  summary: LatestKeywordNewsSummary
+): NewsItem {
+  return {
+    id: summary.id,
+    keyword: summary.keywordName,
+    title: summary.summaryText,
+    time: formatRelativeTime(summary.createdAt),
+    date: formatDate(summary.createdAt),
+  }
+}
+
+function mapHistoryItemsToGroups(
+  keywords: UserKeywordOption[],
+  groupedItems: Array<{
+    keyword: UserKeywordOption
+    items: KeywordNewsHistoryItem[]
+  }>
+): KeywordNewsGroup[] {
+  return keywords.map(keyword => {
+    const matchedItems =
+      groupedItems.find(item => item.keyword.id === keyword.id)?.items ?? []
+
+    return {
+      keyword: keyword.name,
+      count: matchedItems.reduce(
+        (total, item) => total + (item.clusterNewsCount ?? 1),
+        0
+      ),
+      news: matchedItems.slice(0, 3).map(item => ({
+        id: item.id,
+        title: item.summaryText,
+        date: formatDate(item.createdAt),
+      })),
+    }
+  })
+}
+
+function extractKeywordNewsItems(
+  data?: KeywordNewsHistoryItem[] | KeywordNewsPageResponse
+) {
+  if (Array.isArray(data)) {
+    return data
+  }
+
+  if (Array.isArray(data?.content)) {
+    return data.content
+  }
+
+  return []
+}
+
 function DashboardPage() {
   const user = useAuthStore(state => state.user)
+  const [latestKeywordNews, setLatestKeywordNews] = useState<
+    LatestKeywordNewsSummary[]
+  >([])
+  const [keywordGroups, setKeywordGroups] = useState<KeywordNewsGroup[]>([])
+  const [isLoadingAiSummaryNews, setIsLoadingAiSummaryNews] = useState(true)
+  const [aiSummaryNewsError, setAiSummaryNewsError] = useState('')
+  const [isLoadingKeywordNews, setIsLoadingKeywordNews] = useState(true)
+  const [keywordNewsError, setKeywordNewsError] = useState('')
   const [currentPage, setCurrentPage] = useState(0)
   const itemsPerPage = 2
-  const totalPages = Math.ceil(MOCK_KEYWORD_NEWS.length / itemsPerPage)
+  const totalPages = Math.max(1, Math.ceil(keywordGroups.length / itemsPerPage))
 
-  const currentItems = MOCK_KEYWORD_NEWS.slice(
+  const currentItems = keywordGroups.slice(
     currentPage * itemsPerPage,
     (currentPage + 1) * itemsPerPage
   )
+
+  useEffect(() => {
+    const fetchLatestKeywordNews = async () => {
+      setIsLoadingAiSummaryNews(true)
+      setAiSummaryNewsError('')
+
+      try {
+        const result = await getLatestKeywordNewsSummaries()
+
+        if (result.success === false) {
+          throw new Error(
+            result.message || '오늘의 AI 요약 뉴스를 불러오지 못했습니다.'
+          )
+        }
+
+        setLatestKeywordNews(result.data ?? [])
+      } catch (error) {
+        console.error('AI 요약 뉴스 조회 실패:', error)
+        setAiSummaryNewsError(
+          error instanceof Error
+            ? error.message
+            : '오늘의 AI 요약 뉴스를 불러오지 못했습니다.'
+        )
+      } finally {
+        setIsLoadingAiSummaryNews(false)
+      }
+    }
+
+    void fetchLatestKeywordNews()
+  }, [])
+
+  useEffect(() => {
+    const fetchKeywordNewsGroups = async () => {
+      if (!user) {
+        setIsLoadingKeywordNews(false)
+        setKeywordNewsError('사용자 정보를 찾을 수 없습니다.')
+        return
+      }
+
+      setIsLoadingKeywordNews(true)
+      setKeywordNewsError('')
+
+      try {
+        const keywordsResult = await getKeywords<KeywordResponseItem[]>({
+          userId: user.id,
+        })
+
+        if (keywordsResult.success === false) {
+          throw new Error(
+            keywordsResult.message || '사용자 키워드를 불러오지 못했습니다.'
+          )
+        }
+
+        const normalizedKeywords = normalizeKeywords(keywordsResult.data)
+
+        const newsResults = await Promise.all(
+          normalizedKeywords.map(async keyword => {
+            const result = await getKeywordNewsByKeywordId({
+              keywordId: keyword.id,
+              page: 0,
+              size: 3,
+            })
+
+            if (result.success === false) {
+              throw new Error(
+                result.message ||
+                  `${keyword.name} 키워드 기반 뉴스를 불러오지 못했습니다.`
+              )
+            }
+
+            return {
+              keyword,
+              items: extractKeywordNewsItems(
+                result.data as
+                  | KeywordNewsHistoryItem[]
+                  | KeywordNewsPageResponse
+              ),
+            }
+          })
+        )
+
+        setKeywordGroups(
+          mapHistoryItemsToGroups(normalizedKeywords, newsResults)
+        )
+      } catch (error) {
+        console.error('대시보드 키워드 뉴스 조회 실패:', error)
+        setKeywordNewsError(
+          error instanceof Error
+            ? error.message
+            : '키워드 기반 뉴스를 불러오지 못했습니다.'
+        )
+      } finally {
+        setIsLoadingKeywordNews(false)
+      }
+    }
+
+    void fetchKeywordNewsGroups()
+  }, [user])
+
+  useEffect(() => {
+    if (currentPage > totalPages - 1) {
+      setCurrentPage(Math.max(totalPages - 1, 0))
+    }
+  }, [currentPage, totalPages])
+
+  const aiSummaryNews = latestKeywordNews.map(mapLatestSummaryToNewsItem)
 
   const goToPrevPage = () => {
     if (currentPage > 0) {
@@ -53,11 +308,25 @@ function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {MOCK_AI_NEWS.map(news => (
-              <NewsCard key={news.id} news={news} />
-            ))}
-          </div>
+          {isLoadingAiSummaryNews ? (
+            <div className="rounded-xl border border-[#E8F1F8] bg-white p-6 text-sm text-[#64748B]">
+              오늘의 AI 요약 뉴스를 불러오는 중입니다.
+            </div>
+          ) : aiSummaryNewsError ? (
+            <div className="rounded-xl border border-[#F1D5D5] bg-white p-6 text-sm text-[#B45353]">
+              {aiSummaryNewsError}
+            </div>
+          ) : aiSummaryNews.length === 0 ? (
+            <div className="rounded-xl border border-[#E8F1F8] bg-white p-6 text-sm text-[#64748B]">
+              표시할 오늘의 AI 요약 뉴스가 없습니다.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {aiSummaryNews.map(news => (
+                <NewsCard key={news.id} news={news} />
+              ))}
+            </div>
+          )}
         </section>
 
         <section>
@@ -118,11 +387,25 @@ function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            {currentItems.map(group => (
-              <NewsKeyword key={group.keyword} group={group} />
-            ))}
-          </div>
+          {isLoadingKeywordNews ? (
+            <div className="rounded-xl border border-[#E8F1F8] bg-white p-6 text-sm text-[#64748B]">
+              키워드 뉴스를 불러오는 중입니다.
+            </div>
+          ) : keywordNewsError ? (
+            <div className="rounded-xl border border-[#F1D5D5] bg-white p-6 text-sm text-[#B45353]">
+              {keywordNewsError}
+            </div>
+          ) : currentItems.length === 0 ? (
+            <div className="rounded-xl border border-[#E8F1F8] bg-white p-6 text-sm text-[#64748B]">
+              표시할 키워드 뉴스가 없습니다.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+              {currentItems.map(group => (
+                <NewsKeyword key={group.keyword} group={group} />
+              ))}
+            </div>
+          )}
         </section>
       </main>
       <Footer />

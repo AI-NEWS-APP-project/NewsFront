@@ -1,6 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { getPopularKeywords } from '@features/keyword/api/keywords'
+import {
+  getNotificationSettings,
+  saveNotificationSettings,
+} from '@features/onboarding/model/notificationSettings'
 
-const SUGGESTED_KEYWORDS = [
+const FALLBACK_SUGGESTED_KEYWORDS = [
   'AI',
   '경제',
   'IT',
@@ -20,15 +25,51 @@ export type SummaryTime = 'morning' | 'evening'
 export type SummaryTimes = SummaryTime[]
 
 export function useOnboardingState() {
+  const storedNotificationSettings = getNotificationSettings()
   const [step, setStep] = useState<OnboardingStep>(1)
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([])
+  const [suggestedKeywords, setSuggestedKeywords] = useState<string[]>([
+    ...FALLBACK_SUGGESTED_KEYWORDS,
+  ])
   const [customKeyword, setCustomKeyword] = useState('')
   const [keywordError, setKeywordError] = useState('')
   const [notifications, setNotifications] = useState({
-    realtime: true,
-    dailySummary: true,
+    realtime: storedNotificationSettings.realtime,
+    dailySummary: storedNotificationSettings.dailySummary,
   })
-  const [summaryTimes, setSummaryTimes] = useState<SummaryTimes>(['morning'])
+  const [summaryTimes, setSummaryTimes] = useState<SummaryTimes>(
+    storedNotificationSettings.summaryTimes
+  )
+
+  useEffect(() => {
+    const fetchPopularKeywords = async () => {
+      try {
+        const result = await getPopularKeywords<string[]>()
+
+        if (result.success === false) {
+          throw new Error(
+            result.message || '추천 키워드를 불러오지 못했습니다.'
+          )
+        }
+
+        if (Array.isArray(result.data) && result.data.length > 0) {
+          setSuggestedKeywords(result.data)
+        }
+      } catch (error) {
+        console.error('추천 키워드 조회 실패:', error)
+      }
+    }
+
+    void fetchPopularKeywords()
+  }, [])
+
+  useEffect(() => {
+    saveNotificationSettings({
+      realtime: notifications.realtime,
+      dailySummary: notifications.dailySummary,
+      summaryTimes,
+    })
+  }, [notifications, summaryTimes])
 
   const handleKeywordToggle = (keyword: string) => {
     setSelectedKeywords(prev =>
@@ -83,7 +124,7 @@ export function useOnboardingState() {
     setNotifications,
     summaryTimes,
     setSummaryTimes,
-    suggestedKeywords: SUGGESTED_KEYWORDS,
+    suggestedKeywords,
     handleKeywordToggle,
     handleAddCustomKeyword,
     goToNextStep,

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { NewsItem } from '@features/news/model/types'
+import { ClockIcon } from '@shared/assets/icons'
 
 export default function NewsCard({ news }: { news: NewsItem }) {
   return (
@@ -9,10 +10,10 @@ export default function NewsCard({ news }: { news: NewsItem }) {
           {news.keyword}
         </span>
         <div className="mb-2 flex items-center gap-1 text-[10px] text-[#3D5A80]/60">
-          <div className="size-3" />
+          <ClockIcon className="size-3" />
           {news.time}
         </div>
-        <div className="mb-2 line-clamp-3 text-sm font-semibold group-hover:text-[#6B9AC4]">
+        <div className="mb-2 line-clamp-2 text-sm font-semibold group-hover:text-[#6B9AC4]">
           {news.title}
         </div>
         <p className="mt-auto border-t border-sky-700/20 pt-2 text-[10px] text-[#3D5A80]/60">

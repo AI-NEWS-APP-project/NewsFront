@@ -1,8 +1,10 @@
+// import { getLatestKeywordNewsSummaries } from '@features/news/api/keywordNews'
 import { SparklesIcon, TrendingUpIcon, ZapIcon } from '@shared/assets/icons'
 import Button from '@shared/components/Button'
 import FeatureBox from '@shared/components/FeatureBox'
 import Footer from '@shared/components/Footer'
 import Header from '@shared/components/header'
+// import { useEffect, useState } from 'react'
 
 const FEATURES = [
   {
@@ -24,8 +26,53 @@ const FEATURES = [
     iconClassName: 'bg-[#3D5A80]',
   },
 ] as const
+// type NewsSummary = {
+//   title: string
+// }
 
 const WelcomePage = () => {
+  // const [latestKeywordNews, setLatestKeywordNews] = useState<NewsSummary[]>([])
+  // const [currentIndex, setCurrentIndex] = useState(0)
+
+  // const [isLoadingAiSummaryNews, setIsLoadingAiSummaryNews] = useState(true)
+  // const [aiSummaryNewsError, setAiSummaryNewsError] = useState('')
+
+  // useEffect(() => {
+  //   if (!latestKeywordNews.length) return
+
+  //   const interval = setInterval(() => {
+  //     setCurrentIndex(prev => (prev + 1) % latestKeywordNews.length)
+  //   }, 3000) // 3초마다 변경
+
+  //   return () => clearInterval(interval)
+  // }, [latestKeywordNews])
+
+  // useEffect(() => {
+  //   const fetchLatestKeywordNews = async () => {
+  //     try {
+  //       const result = await getLatestKeywordNewsSummaries()
+
+  //       if (result.success === false) {
+  //         throw new Error(
+  //           result.message || '오늘의 AI 요약 뉴스를 불러오지 못했습니다.'
+  //         )
+  //       }
+
+  //       setLatestKeywordNews(result.data ?? [])
+  //     } catch (error) {
+  //       console.error('AI 요약 뉴스 조회 실패:', error)
+  //       setAiSummaryNewsError(
+  //         error instanceof Error
+  //           ? error.message
+  //           : '오늘의 AI 요약 뉴스를 불러오지 못했습니다.'
+  //       )
+  //     } finally {
+  //       setIsLoadingAiSummaryNews(false)
+  //     }
+  //   }
+
+  //   void fetchLatestKeywordNews()
+  // }, [])
   return (
     <div className="min-h-screen bg-[#F8FBFD] text-[#2C3E50]">
       <Header />
@@ -75,8 +122,16 @@ const WelcomePage = () => {
                     <div className="mb-2 text-xs font-semibold text-white/70">
                       오늘의 핵심 이슈
                     </div>
-                    <div className="text-lg font-bold">
-                      시장, 기술, 정책 변화를 한 번에
+                    <div className="relative h-7 overflow-hidden">
+                      <div
+                        // key={currentIndex}
+                        className="animate-fadeIn absolute w-full text-lg font-bold"
+                      >
+                        {/* {latestKeywordNews.length > 0
+                          ? latestKeywordNews[currentIndex]?.title
+                          : '뉴스를 불러오는 중...'} */}
+                        AI가 분석한 오늘의 핵심 뉴스를 보여드립니다.
+                      </div>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -153,5 +208,4 @@ const WelcomePage = () => {
     </div>
   )
 }
-
 export default WelcomePage
