@@ -1,6 +1,4 @@
-import type {
-  SummaryTimes,
-} from '@features/onboarding/model/useOnboardingState'
+import type { SummaryTimes } from '@features/onboarding/model/useOnboardingState'
 
 const NOTIFICATION_SETTINGS_KEY = 'briefy-notification-settings'
 
@@ -30,10 +28,9 @@ export function getNotificationSettings(): NotificationSettings {
       realtime: parsedValue.realtime ?? DEFAULT_NOTIFICATION_SETTINGS.realtime,
       dailySummary:
         parsedValue.dailySummary ?? DEFAULT_NOTIFICATION_SETTINGS.dailySummary,
-      summaryTimes:
-        parsedValue.summaryTimes?.length
-          ? parsedValue.summaryTimes
-          : DEFAULT_NOTIFICATION_SETTINGS.summaryTimes,
+      summaryTimes: parsedValue.summaryTimes?.length
+        ? parsedValue.summaryTimes
+        : DEFAULT_NOTIFICATION_SETTINGS.summaryTimes,
     }
   } catch {
     localStorage.removeItem(NOTIFICATION_SETTINGS_KEY)
