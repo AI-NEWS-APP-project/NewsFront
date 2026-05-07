@@ -1,4 +1,5 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { Navigate, createBrowserRouter } from 'react-router-dom'
+import { OnboardingRoute, RequireCompletedOnboarding } from '@app/router/guards'
 
 export const router = createBrowserRouter([
   {
@@ -10,9 +11,15 @@ export const router = createBrowserRouter([
   },
   {
     path: '/onboarding',
-    lazy: async () => {
+    async lazy() {
       const { default: OnboardingPage } = await import('@pages/OnboardingPage')
-      return { Component: OnboardingPage }
+      return {
+        Component: () => (
+          <OnboardingRoute>
+            <OnboardingPage />
+          </OnboardingRoute>
+        ),
+      }
     },
   },
   {
@@ -31,30 +38,76 @@ export const router = createBrowserRouter([
   },
   {
     path: '/dashboard',
-    lazy: async () => {
+    async lazy() {
       const { default: DashboardPage } = await import('@pages/DashboardPage')
-      return { Component: DashboardPage }
+      return {
+        Component: () => (
+          <RequireCompletedOnboarding>
+            <DashboardPage />
+          </RequireCompletedOnboarding>
+        ),
+      }
     },
   },
   {
-    path: '/keyword',
-    lazy: async () => {
-      const { default: KeywordPage } = await import('@pages/KeywordPage')
-      return { Component: KeywordPage }
-    },
-  },
-  {
-    path: '/alarm',
-    lazy: async () => {
-      const { default: AlarmPage } = await import('@pages/AlarmPage')
-      return { Component: AlarmPage }
-    },
+    path: '/setting',
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/setting/alarm" replace />,
+      },
+      {
+        path: 'keyword',
+        lazy: async () => {
+          const { default: KeywordPage } = await import('@pages/KeywordPage')
+          return {
+            Component: () => (
+              <RequireCompletedOnboarding>
+                <KeywordPage />
+              </RequireCompletedOnboarding>
+            ),
+          }
+        },
+      },
+      {
+        path: 'alarm',
+        lazy: async () => {
+          const { default: AlarmPage } = await import('@pages/AlarmPage')
+          return {
+            Component: () => (
+              <RequireCompletedOnboarding>
+                <AlarmPage />
+              </RequireCompletedOnboarding>
+            ),
+          }
+        },
+      },
+    ],
   },
   {
     path: '/news',
     lazy: async () => {
       const { default: NewsListPage } = await import('@pages/NewsListPage')
-      return { Component: NewsListPage }
+      return {
+        Component: () => (
+          <RequireCompletedOnboarding>
+            <NewsListPage />
+          </RequireCompletedOnboarding>
+        ),
+      }
+    },
+  },
+  {
+    path: '/news/:id',
+    lazy: async () => {
+      const { default: NewsDetailPage } = await import('@pages/NewsDetailPage')
+      return {
+        Component: () => (
+          <RequireCompletedOnboarding>
+            <NewsDetailPage />
+          </RequireCompletedOnboarding>
+        ),
+      }
     },
   },
 ])

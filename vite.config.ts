@@ -7,6 +7,17 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    proxy: {
+      '/api/auth': {
+        target: 'https://port-0-newsback-mnhfhlid34c7c977.sel3.cloudtype.app',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/api/, ''),
+      },
+      '/api': {
+        target: 'https://port-0-newsback-mnhfhlid34c7c977.sel3.cloudtype.app',
+        changeOrigin: true,
+      },
+    },
   },
   resolve: {
     alias: {
