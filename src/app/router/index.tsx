@@ -98,13 +98,27 @@ export const router = createBrowserRouter([
     },
   },
   {
-    path: '/news/:id',
+    path: '/news/keyword-news/:id',
     lazy: async () => {
       const { default: NewsDetailPage } = await import('@pages/NewsDetailPage')
       return {
         Component: () => (
           <RequireCompletedOnboarding>
             <NewsDetailPage />
+          </RequireCompletedOnboarding>
+        ),
+      }
+    },
+  },
+  {
+    path: '/news/daily-briefings/:id',
+    lazy: async () => {
+      const { default: DailyBriefingDetailPage } =
+        await import('@pages/DailyBriefingDetailPage')
+      return {
+        Component: () => (
+          <RequireCompletedOnboarding>
+            <DailyBriefingDetailPage />
           </RequireCompletedOnboarding>
         ),
       }

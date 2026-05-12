@@ -140,9 +140,7 @@ function NewsListPage() {
       setErrorMessage('')
 
       try {
-        const result = await getKeywords<KeywordResponseItem[]>({
-          userId: user.id,
-        })
+        const result = await getKeywords<KeywordResponseItem[]>()
 
         if (result.success === false) {
           throw new Error(

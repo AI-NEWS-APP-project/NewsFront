@@ -14,7 +14,11 @@ export default function NewsKeyword({ group }: { group: KeywordNewsGroup }) {
       <div className="mb-4 space-y-2">
         {group.news.length > 0 ? (
           group.news.map(item => (
-            <Link key={item.id} to={`/news/${item.id}`} className="group block">
+            <Link
+              key={item.id}
+              to={`/news/keyword-news/${item.id}`}
+              className="group block"
+            >
               <div className="rounded-lg bg-[#F8FBFD] p-3 text-left transition-all hover:bg-[#E8F1F8]">
                 <p className="line-clamp-2 text-xs font-medium text-[#2C3E50] transition-colors group-hover:text-[#6B9AC4]">
                   {item.title}

@@ -5,7 +5,7 @@ export type SocialProvider = 'google' | 'kakao'
 
 interface SocialLoginRequest {
   socialToken: string
-  fcmToken?: string
+  fcmToken?: string | null
 }
 
 interface SocialLoginResponseData {
@@ -22,11 +22,12 @@ export interface SocialLoginResponse {
 
 export const loginWithSocial = async (
   provider: SocialProvider,
-  socialToken: string
+  socialToken: string,
+  fcmToken?: string | null
 ): Promise<SocialLoginResponse> => {
   const requestBody: SocialLoginRequest = {
     socialToken,
-    fcmToken: 'fcm-token-abc-123',
+    fcmToken,
   }
 
   const response = await axiosInstance.post<SocialLoginResponse>(

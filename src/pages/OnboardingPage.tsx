@@ -28,7 +28,6 @@ export default function OnboardingPage() {
     try {
       if (user && onboarding.selectedKeywords.length > 0) {
         const result = await createKeywordsBulk({
-          userId: user.id,
           keywords: onboarding.selectedKeywords,
         })
 

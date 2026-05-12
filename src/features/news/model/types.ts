@@ -66,3 +66,23 @@ export interface KeywordNewsDetail {
   createdAt: string
   links: KeywordNewsDetailLink[]
 }
+
+export interface DailyBriefingSummary {
+  id: number
+  title: string
+  summary: string
+  newsCount: number
+  generatedAt: string
+}
+
+export interface DailyBriefingNews {
+  id: string
+  title: string
+  url: string
+  source?: string | null
+  publishedAt?: string | null
+}
+
+export interface DailyBriefingDetail extends DailyBriefingSummary {
+  news: DailyBriefingNews[]
+}
