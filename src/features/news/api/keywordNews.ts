@@ -7,10 +7,6 @@ import type {
   LatestKeywordNewsSummary,
 } from '@features/news/model/types'
 
-interface GetKeywordNewsHistoryParams {
-  userId: number | string
-}
-
 interface GetKeywordNewsByKeywordIdParams {
   keywordId: number | string
   page?: number
@@ -18,18 +14,11 @@ interface GetKeywordNewsByKeywordIdParams {
 }
 
 export const getKeywordNewsHistory = async <T = unknown>(
-  params: GetKeywordNewsHistoryParams,
   config?: AxiosRequestConfig
 ): Promise<ApiResponse<T>> => {
   const response = await axiosInstance.get<ApiResponse<T>>(
     '/news/keyword-news',
-    {
-      ...config,
-      params: {
-        ...config?.params,
-        userId: params.userId,
-      },
-    }
+    config
   )
 
   return response.data
@@ -81,18 +70,11 @@ export const getLatestKeywordNewsSummaries = async (
 }
 
 export const getKeywordNewsHistoryItems = async (
-  params: GetKeywordNewsHistoryParams,
   config?: AxiosRequestConfig
 ): Promise<ApiResponse<KeywordNewsHistoryItem[]>> => {
   const response = await axiosInstance.get<
     ApiResponse<KeywordNewsHistoryItem[]>
-  >('/news/keyword-news', {
-    ...config,
-    params: {
-      ...config?.params,
-      userId: params.userId,
-    },
-  })
+  >('/news/keyword-news', config)
 
   return response.data
 }

@@ -4,7 +4,7 @@ import { ClockIcon } from '@shared/assets/icons'
 
 export default function NewsCard({ news }: { news: NewsItem }) {
   return (
-    <Link to={`/news/${news.id}`}>
+    <Link to={`/news/keyword-news/${news.id}`}>
       <div className="group flex h-48 flex-col rounded-xl border border-sky-700/20 bg-white p-4 text-left hover:shadow-md">
         <span className="mb-2 inline-block self-start rounded-md bg-[#6B9AC4] px-2 py-1 text-[10px] font-bold text-white">
           {news.keyword}

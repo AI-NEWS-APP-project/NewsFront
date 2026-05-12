@@ -1,5 +1,5 @@
 interface SourceArticle {
-  id: number
+  id: number | string
   title: string
   url: string
   source?: string

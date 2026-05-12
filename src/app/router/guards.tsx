@@ -1,7 +1,21 @@
 import type { ReactNode } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { hasCompletedOnboarding } from '@features/onboarding/model/onboardingStatus'
 import { useAuthStore } from '@features/auth/model/useAuthStore'
+
+function buildLoginPath(pathname: string, search: string) {
+  const currentPath = `${pathname}${search}`
+
+  if (!currentPath || currentPath === '/') {
+    return '/login'
+  }
+
+  const searchParams = new URLSearchParams({
+    redirect: currentPath,
+  })
+
+  return `/login?${searchParams.toString()}`
+}
 
 function useOnboardingRedirectPath() {
   const isAuthenticated = useAuthStore(state => state.isAuthenticated)
@@ -21,7 +35,19 @@ export function RequireCompletedOnboarding({
 }: {
   children: ReactNode
 }) {
+  const location = useLocation()
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated)
+  const user = useAuthStore(state => state.user)
   const redirectPath = useOnboardingRedirectPath()
+
+  if (!isAuthenticated || !user) {
+    return (
+      <Navigate
+        to={buildLoginPath(location.pathname, location.search)}
+        replace
+      />
+    )
+  }
 
   if (redirectPath === '/onboarding') {
     return <Navigate to="/onboarding" replace />
@@ -31,7 +57,19 @@ export function RequireCompletedOnboarding({
 }
 
 export function OnboardingRoute({ children }: { children: ReactNode }) {
+  const location = useLocation()
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated)
+  const user = useAuthStore(state => state.user)
   const redirectPath = useOnboardingRedirectPath()
+
+  if (!isAuthenticated || !user) {
+    return (
+      <Navigate
+        to={buildLoginPath(location.pathname, location.search)}
+        replace
+      />
+    )
+  }
 
   if (redirectPath) {
     if (redirectPath === '/dashboard') {

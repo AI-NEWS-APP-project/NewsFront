@@ -3,7 +3,7 @@ import type { NewsItem } from '@features/news/model/types'
 
 export default function NewsListItem({ news }: { news: NewsItem }) {
   return (
-    <Link to={`/news/${news.id}`} className="group block">
+    <Link to={`/news/keyword-news/${news.id}`} className="group block">
       <article className="flex items-start gap-4 rounded-2xl border border-[#DCE8F4] bg-white px-5 py-4 text-left transition-all hover:border-[#9DB3CB] hover:shadow-md">
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="mb-3 flex flex-wrap items-center gap-2">

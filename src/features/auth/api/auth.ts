@@ -5,20 +5,24 @@ import type { User } from '@features/auth/model/useAuthStore'
 interface LoginRequest {
   email: string
   password: string
-  fcmToken: string
+  fcmToken?: string | null
 }
 
 interface LogoutRequest {
   refreshToken: string
 }
 
-interface AuthResponseData {
+interface RefreshRequest {
+  refreshToken: string
+}
+
+export interface AuthResponseData {
   accessToken: string
   refreshToken: string
   user: User
 }
 
-interface AuthResponse {
+export interface AuthResponse {
   success?: boolean
   message?: string
   data: AuthResponseData
@@ -38,6 +42,18 @@ export const login = async (
 export const logout = async (refreshToken: string) => {
   const requestBody: LogoutRequest = { refreshToken }
   await axiosInstance.post('/auth/logout', requestBody)
+}
+
+export const refreshAuthToken = async (
+  refreshToken: string
+): Promise<AuthResponse> => {
+  const requestBody: RefreshRequest = { refreshToken }
+  const response = await axiosInstance.post<AuthResponse>(
+    '/auth/refresh',
+    requestBody
+  )
+
+  return response.data
 }
 
 export const getAuthErrorMessage = (

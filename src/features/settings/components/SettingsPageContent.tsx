@@ -6,6 +6,12 @@ import {
   getKeywords,
   getPopularKeywords,
 } from '@features/keyword/api/keywords'
+import {
+  disableStoredFcmToken,
+  enableFcmToken,
+} from '@features/alarm/lib/fcmTokenLifecycle'
+import { getNotificationPermission } from '@features/alarm/lib/fcmMessaging'
+import { getStoredFcmToken } from '@features/alarm/model/fcmTokenStorage'
 import { useAuthStore } from '@features/auth/model/useAuthStore'
 import KeywordChip from '@features/onboarding/components/KeywordChip'
 import KeywordOptionButton from '@features/onboarding/components/KeywordOptionButton'
@@ -96,7 +102,7 @@ function SettingsKeywordTab() {
 
       try {
         const [keywordsResult, popularResult] = await Promise.all([
-          getKeywords<KeywordResponseItem[]>({ userId: user.id }),
+          getKeywords<KeywordResponseItem[]>(),
           getPopularKeywords<string[]>(),
         ])
 
@@ -138,7 +144,6 @@ function SettingsKeywordTab() {
 
     try {
       const result = await deleteKeywordById({
-        userId: user.id,
         keywordId: keyword.id,
       })
 
@@ -185,16 +190,13 @@ function SettingsKeywordTab() {
 
     try {
       const result = await createKeyword({
-        userId: user.id,
         keyword: nextKeyword,
       })
       if (result.success === false) {
         throw new Error(result.message || '키워드 추가 중 문제가 발생했습니다.')
       }
 
-      const refreshedKeywords = await getKeywords<KeywordResponseItem[]>({
-        userId: user.id,
-      })
+      const refreshedKeywords = await getKeywords<KeywordResponseItem[]>()
 
       if (refreshedKeywords.success === false) {
         throw new Error(
@@ -314,14 +316,18 @@ function SettingsKeywordTab() {
 }
 
 function SettingsAlarmTab() {
+  const user = useAuthStore(state => state.user)
   const storedNotificationSettings = getNotificationSettings()
   const [notifications, setNotifications] = useState({
-    realtime: storedNotificationSettings.realtime,
+    realtime:
+      Boolean(getStoredFcmToken()) && storedNotificationSettings.realtime,
     dailySummary: storedNotificationSettings.dailySummary,
   })
   const [summaryTimes, setSummaryTimes] = useState<SummaryTimes>(
     storedNotificationSettings.summaryTimes
   )
+  const [isUpdatingPush, setIsUpdatingPush] = useState(false)
+  const [pushMessage, setPushMessage] = useState('')
 
   const handleSummaryTimeToggle = (time: SummaryTime) => {
     setSummaryTimes(prev => {
@@ -339,21 +345,63 @@ function SettingsAlarmTab() {
     })
   }
 
-  const handleRealtimeToggle = () => {
-    setNotifications(prev => {
-      const nextNotifications = {
-        ...prev,
-        realtime: !prev.realtime,
+  const handleRealtimeToggle = async () => {
+    if (!user) {
+      setPushMessage('사용자 정보를 찾을 수 없습니다.')
+      return
+    }
+
+    if (isUpdatingPush) {
+      return
+    }
+
+    const nextRealtime = !notifications.realtime
+    setIsUpdatingPush(true)
+    setPushMessage('')
+
+    try {
+      if (nextRealtime) {
+        const token = await enableFcmToken()
+
+        if (!token) {
+          const permission = getNotificationPermission()
+          setPushMessage(
+            permission === 'denied'
+              ? '브라우저에서 알림 권한이 차단되어 있습니다.'
+              : '현재 브라우저에서는 웹 푸시 알림을 사용할 수 없습니다.'
+          )
+          return
+        }
+      } else {
+        await disableStoredFcmToken()
       }
 
+      const nextNotifications = {
+        ...notifications,
+        realtime: nextRealtime,
+      }
+
+      setNotifications(nextNotifications)
       saveNotificationSettings({
         realtime: nextNotifications.realtime,
         dailySummary: nextNotifications.dailySummary,
         summaryTimes,
       })
-
-      return nextNotifications
-    })
+      setPushMessage(
+        nextRealtime
+          ? '실시간 푸시 알림이 켜졌습니다.'
+          : '실시간 푸시 알림이 꺼졌습니다.'
+      )
+    } catch (error) {
+      console.error('실시간 푸시 알림 설정 실패:', error)
+      setPushMessage(
+        error instanceof Error
+          ? error.message
+          : '실시간 푸시 알림 설정 중 문제가 발생했습니다.'
+      )
+    } finally {
+      setIsUpdatingPush(false)
+    }
   }
 
   const handleDailySummaryToggle = () => {
@@ -374,13 +422,32 @@ function SettingsAlarmTab() {
   }
 
   return (
-    <OnboardingNotificationStep
-      notifications={notifications}
-      onRealtimeToggle={handleRealtimeToggle}
-      onDailySummaryToggle={handleDailySummaryToggle}
-      summaryTimes={summaryTimes}
-      onSummaryTimeToggle={handleSummaryTimeToggle}
-    />
+    <div className="mx-auto max-w-148 space-y-3">
+      <OnboardingNotificationStep
+        notifications={notifications}
+        onRealtimeToggle={() => void handleRealtimeToggle()}
+        onDailySummaryToggle={handleDailySummaryToggle}
+        summaryTimes={summaryTimes}
+        onSummaryTimeToggle={handleSummaryTimeToggle}
+      />
+      {pushMessage ? (
+        <div
+          className={`rounded-xl border px-4 py-3 text-sm font-semibold ${
+            pushMessage.includes('켰습니다') ||
+            pushMessage.includes('꺼졌습니다')
+              ? 'border-[#DCE9F6] bg-white text-[#4A678C]'
+              : 'border-[#F1D5D5] bg-white text-[#B45353]'
+          }`}
+        >
+          {pushMessage}
+        </div>
+      ) : null}
+      {isUpdatingPush ? (
+        <div className="text-sm text-[#64748B]">
+          실시간 푸시 알림 설정을 저장하는 중입니다.
+        </div>
+      ) : null}
+    </div>
   )
 }
 

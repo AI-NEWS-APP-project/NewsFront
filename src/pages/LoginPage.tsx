@@ -6,6 +6,7 @@ import {
   loginWithSocial,
   type SocialProvider,
 } from '@features/auth/api/socialAuth'
+import { getStoredFcmToken } from '@features/alarm/model/fcmTokenStorage'
 import { getSignupName } from '@features/auth/model/signupProfile'
 import { useAuthStore } from '@features/auth/model/useAuthStore'
 import { hasCompletedOnboarding } from '@features/onboarding/model/onboardingStatus'
@@ -31,9 +32,35 @@ function LoginPage() {
   const [socialLoginProvider, setSocialLoginProvider] =
     useState<SocialProvider | null>(null)
 
+  const resolveRedirectPath = useCallback(() => {
+    const searchParams = new URLSearchParams(location.search)
+    const redirectPath = searchParams.get('redirect')
+
+    if (
+      redirectPath &&
+      redirectPath.startsWith('/') &&
+      !redirectPath.startsWith('//')
+    ) {
+      return redirectPath
+    }
+
+    return null
+  }, [location.search])
+
   const resolveUserName = useCallback((name?: string, userEmail?: string) => {
     return name || getSignupName() || userEmail?.split('@')[0] || '사용자'
   }, [])
+
+  const resolveLoginDestination = useCallback(
+    (userId: string | number) => {
+      if (!hasCompletedOnboarding(userId)) {
+        return '/onboarding'
+      }
+
+      return resolveRedirectPath() || '/dashboard'
+    },
+    [resolveRedirectPath]
+  )
 
   const handleEmailChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,12 +80,18 @@ function LoginPage() {
 
   useEffect(() => {
     const socialLoginError = location.state?.socialLoginError
+    const searchParams = new URLSearchParams(location.search)
 
     if (typeof socialLoginError === 'string' && socialLoginError) {
       setLoginError(socialLoginError)
       navigate(location.pathname, { replace: true, state: null })
+      return
     }
-  }, [location.pathname, location.state, navigate])
+
+    if (searchParams.get('reason') === 'session-expired') {
+      setLoginError('로그인이 만료되었습니다. 다시 로그인해 주세요.')
+    }
+  }, [location.pathname, location.search, location.state, navigate])
 
   const processSocialLogin = useCallback(
     async (provider: SocialProvider, socialToken: string) => {
@@ -66,7 +99,11 @@ function LoginPage() {
       setSocialLoginProvider(provider)
 
       try {
-        const result = await loginWithSocial(provider, socialToken)
+        const result = await loginWithSocial(
+          provider,
+          socialToken,
+          getStoredFcmToken()
+        )
 
         if (!result.success) {
           throw new Error(
@@ -86,7 +123,7 @@ function LoginPage() {
           accessToken,
           refreshToken
         )
-        navigate(hasCompletedOnboarding(user.id) ? '/dashboard' : '/onboarding')
+        navigate(resolveLoginDestination(user.id))
       } catch (error) {
         console.error(`${provider} 로그인 실패:`, error)
         setLoginError('소셜 로그인 처리 중 오류가 발생했습니다.')
@@ -94,7 +131,7 @@ function LoginPage() {
         setSocialLoginProvider(null)
       }
     },
-    [navigate, resolveUserName, setAuth]
+    [navigate, resolveLoginDestination, resolveUserName, setAuth]
   )
 
   const triggerGoogleLogin = useGoogleLogin({
@@ -148,7 +185,7 @@ function LoginPage() {
       const result = await login({
         email,
         password,
-        fcmToken: 'fcm-token-abc-123',
+        fcmToken: getStoredFcmToken(),
       })
 
       if (result.success === false) {
@@ -170,7 +207,7 @@ function LoginPage() {
         refreshToken
       )
 
-      navigate(hasCompletedOnboarding(user.id) ? '/dashboard' : '/onboarding')
+      navigate(resolveLoginDestination(user.id))
     } catch (error) {
       setLoginError(
         error instanceof Error
