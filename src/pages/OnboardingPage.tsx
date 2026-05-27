@@ -9,7 +9,7 @@ import { markOnboardingCompleted } from '@features/onboarding/model/onboardingSt
 import { useOnboardingState } from '@features/onboarding/model/useOnboardingState'
 import Button from '@shared/components/Button'
 import Footer from '@shared/components/Footer'
-import Header from '@shared/components/header'
+import Header from '@widgets/header/ui/Header'
 
 export default function OnboardingPage() {
   const navigate = useNavigate()

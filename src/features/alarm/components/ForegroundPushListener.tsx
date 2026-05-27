@@ -1,12 +1,16 @@
 import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { router } from '@app/router'
 import { listenForegroundMessage } from '@features/alarm/lib/fcmMessaging'
+import { notificationKeys } from '@features/alarm/model/notificationQueryKeys'
 import {
   resolvePushRoute,
   type PushMessageData,
 } from '@features/alarm/model/pushPayload'
 
 export default function ForegroundPushListener() {
+  const queryClient = useQueryClient()
+
   useEffect(() => {
     let unsubscribe: (() => void) | undefined
     let isMounted = true
@@ -25,6 +29,8 @@ export default function ForegroundPushListener() {
         permission:
           'Notification' in window ? Notification.permission : 'unsupported',
       })
+
+      void queryClient.invalidateQueries({ queryKey: notificationKeys.all })
 
       if ('Notification' in window && Notification.permission === 'granted') {
         const notification = new Notification(title, {
@@ -63,7 +69,7 @@ export default function ForegroundPushListener() {
       unsubscribe?.()
       console.info('[FCM] ForegroundPushListener unmounted.')
     }
-  }, [])
+  }, [queryClient])
 
   return null
 }

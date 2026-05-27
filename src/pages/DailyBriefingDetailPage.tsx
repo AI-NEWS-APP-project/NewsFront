@@ -6,7 +6,7 @@ import type { DailyBriefingDetail } from '@features/news/model/types'
 import { NewsSummaryIcon } from '@shared/assets/icons'
 import Button from '@shared/components/Button'
 import Footer from '@shared/components/Footer'
-import Header from '@shared/components/header'
+import Header from '@widgets/header/ui/Header'
 
 function formatDateTime(value: string) {
   const date = new Date(value)
