@@ -24,6 +24,10 @@ export interface NotificationPage {
   empty: boolean
 }
 
+export interface UnreadNotificationCount {
+  unreadCount: number
+}
+
 interface GetNotificationsParams {
   page?: number
   size?: number
@@ -48,11 +52,31 @@ export async function getNotifications(
   return response.data
 }
 
+export async function getUnreadNotificationCount(): Promise<
+  ApiResponse<UnreadNotificationCount>
+> {
+  const response = await axiosInstance.get<
+    ApiResponse<UnreadNotificationCount>
+  >('/notifications/unread-count')
+
+  return response.data
+}
+
 export async function markNotificationAsRead(
   notificationId: number | string
 ): Promise<ApiResponse<null>> {
   const response = await axiosInstance.patch<ApiResponse<null>>(
     `/notifications/${notificationId}/read`
+  )
+
+  return response.data
+}
+
+export async function deleteNotification(
+  notificationId: number | string
+): Promise<ApiResponse<null>> {
+  const response = await axiosInstance.delete<ApiResponse<null>>(
+    `/notifications/${notificationId}`
   )
 
   return response.data

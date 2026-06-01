@@ -3,7 +3,7 @@ import { SparklesIcon, TrendingUpIcon, ZapIcon } from '@shared/assets/icons'
 import Button from '@shared/components/Button'
 import FeatureBox from '@shared/components/FeatureBox'
 import Footer from '@shared/components/Footer'
-import Header from '@shared/components/header'
+import Header from '@widgets/header/ui/Header'
 // import { useEffect, useState } from 'react'
 
 const FEATURES = [

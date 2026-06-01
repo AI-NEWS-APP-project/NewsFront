@@ -10,9 +10,25 @@ type RetriableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean
 }
 
+function withApiVersionPrefix(baseURL: string) {
+  const normalizedBaseURL = baseURL.replace(/\/$/, '')
+
+  if (normalizedBaseURL.endsWith('/api/v1')) {
+    return normalizedBaseURL
+  }
+
+  if (normalizedBaseURL.endsWith('/api')) {
+    return `${normalizedBaseURL}/v1`
+  }
+
+  return `${normalizedBaseURL}/api/v1`
+}
+
 const apiBaseURL = import.meta.env.DEV
   ? '/api/v1'
-  : import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1'
+  : withApiVersionPrefix(
+      import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+    )
 
 const axiosInstance = axios.create({
   baseURL: apiBaseURL,

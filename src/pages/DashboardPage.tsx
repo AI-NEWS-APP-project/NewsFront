@@ -13,7 +13,7 @@ import type {
 import { getKeywords } from '@features/keyword/api/keywords'
 import { useAuthStore } from '@features/auth/model/useAuthStore'
 import NewsKeyword from '@features/news/newsKeyword'
-import Header from '@shared/components/header'
+import Header from '@widgets/header/ui/Header'
 import Footer from '@shared/components/Footer'
 
 type KeywordResponseItem =

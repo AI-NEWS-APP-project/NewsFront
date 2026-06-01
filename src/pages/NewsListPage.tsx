@@ -11,7 +11,7 @@ import NewsCard from '@features/news/newsCard'
 import NewsListItem from '@features/news/newsListItem'
 import { GridIcon, ListIcon } from '@shared/assets/icons'
 import { useAuthStore } from '@features/auth/model/useAuthStore'
-import Header from '@shared/components/header'
+import Header from '@widgets/header/ui/Header'
 import Footer from '@shared/components/Footer'
 
 type ViewMode = 'grid' | 'list'

@@ -33,10 +33,16 @@ export default function OnboardingKeywordStep({
             value={customKeyword}
             onChange={e => onCustomKeywordChange(e.target.value)}
             onKeyDown={e => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                onCustomKeywordSubmit()
+              if (e.key !== 'Enter') {
+                return
               }
+
+              if (e.nativeEvent.isComposing || e.keyCode === 229) {
+                return
+              }
+
+              e.preventDefault()
+              onCustomKeywordSubmit()
             }}
             placeholder="예: 인공지능, 스타트업, 주식..."
             error={keywordError || undefined}

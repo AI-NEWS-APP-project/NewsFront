@@ -1,6 +1,6 @@
 import type { HTMLInputTypeAttribute, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Header from '@shared/components/header'
+import Header from '@widgets/header/ui/Header'
 import Button from '@shared/components/Button'
 import Input from '@shared/components/Input'
 import { signup, getSignupErrorMessage } from '@features/auth/api/signup'

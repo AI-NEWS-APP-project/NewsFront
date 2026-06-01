@@ -29,7 +29,7 @@ import { PlusIcon } from '@shared/assets/icons'
 import Button from '@shared/components/Button'
 import Footer from '@shared/components/Footer'
 import Input from '@shared/components/Input'
-import Header from '@shared/components/header'
+import Header from '@widgets/header/ui/Header'
 
 type SettingsTab = 'keyword' | 'alarm'
 
@@ -229,10 +229,16 @@ function SettingsKeywordTab() {
             value={customKeyword}
             onChange={event => setCustomKeyword(event.target.value)}
             onKeyDown={event => {
-              if (event.key === 'Enter') {
-                event.preventDefault()
-                void handleAddKeyword(customKeyword)
+              if (event.key !== 'Enter') {
+                return
               }
+
+              if (event.nativeEvent.isComposing || event.keyCode === 229) {
+                return
+              }
+
+              event.preventDefault()
+              void handleAddKeyword(customKeyword)
             }}
             placeholder="예: 인공지능, 스타트업, 주식..."
             error={keywordError || undefined}
