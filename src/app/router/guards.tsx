@@ -3,7 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { hasCompletedOnboarding } from '@features/onboarding/model/onboardingStatus'
 import { useAuthStore } from '@features/auth/model/useAuthStore'
 import AuthRequiredModal from '@shared/components/AuthRequiredModal'
-import Header from '@shared/components/header'
+import Header from '@widgets/header/ui/Header'
 
 function buildAuthPath(
   targetPath: '/login' | '/signup',

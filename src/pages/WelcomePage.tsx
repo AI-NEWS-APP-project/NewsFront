@@ -4,7 +4,7 @@ import { SparklesIcon, TrendingUpIcon, ZapIcon } from '@shared/assets/icons'
 import Button from '@shared/components/Button'
 import FeatureBox from '@shared/components/FeatureBox'
 import Footer from '@shared/components/Footer'
-import Header from '@shared/components/header'
+import Header from '@widgets/header/ui/Header'
 
 const HERO_STATS = {
   recommendedKeyword: '주식',
@@ -116,7 +116,6 @@ const WelcomePage = () => {
   return (
     <div className="min-h-screen bg-[#F8FBFD] text-[#2C3E50]">
       <Header />
-
       <main className="h-[calc(100svh-4.375rem)] snap-y snap-mandatory overflow-y-auto">
         <section className="relative flex min-h-[calc(100svh-4.375rem)] snap-start items-center px-6 py-12">
           <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-12 lg:flex-row lg:items-center">

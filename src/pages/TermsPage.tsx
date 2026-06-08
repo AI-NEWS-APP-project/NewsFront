@@ -1,5 +1,5 @@
 import Footer from '@shared/components/Footer'
-import Header from '@shared/components/header'
+import Header from '@widgets/header/ui/Header'
 
 const TERMS_SECTIONS = [
   {
