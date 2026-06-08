@@ -1,10 +1,15 @@
 // import { getLatestKeywordNewsSummaries } from '@features/news/api/keywordNews'
+import { useEffect, useState } from 'react'
 import { SparklesIcon, TrendingUpIcon, ZapIcon } from '@shared/assets/icons'
 import Button from '@shared/components/Button'
 import FeatureBox from '@shared/components/FeatureBox'
 import Footer from '@shared/components/Footer'
-import Header from '@widgets/header/ui/Header'
-// import { useEffect, useState } from 'react'
+import Header from '@shared/components/header'
+
+const HERO_STATS = {
+  recommendedKeyword: '주식',
+  newsCount: 320,
+} as const
 
 const FEATURES = [
   {
@@ -30,7 +35,42 @@ const FEATURES = [
 //   title: string
 // }
 
+function useCountUp(targetValue: number, duration = 1200) {
+  const [value, setValue] = useState(0)
+
+  useEffect(() => {
+    if (targetValue <= 0) {
+      return
+    }
+
+    const startTime = performance.now()
+    let animationFrameId = 0
+
+    const updateValue = (currentTime: number) => {
+      const elapsedTime = currentTime - startTime
+      const progress = Math.min(elapsedTime / duration, 1)
+      const easedProgress = 1 - Math.pow(1 - progress, 5)
+
+      setValue(Math.round(targetValue * easedProgress))
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(updateValue)
+      }
+    }
+
+    animationFrameId = requestAnimationFrame(updateValue)
+
+    return () => {
+      cancelAnimationFrame(animationFrameId)
+    }
+  }, [duration, targetValue])
+
+  return targetValue <= 0 ? 0 : value
+}
+
 const WelcomePage = () => {
+  const animatedNewsCount = useCountUp(HERO_STATS.newsCount)
+
   // const [latestKeywordNews, setLatestKeywordNews] = useState<NewsSummary[]>([])
   // const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -130,25 +170,25 @@ const WelcomePage = () => {
                         {/* {latestKeywordNews.length > 0
                           ? latestKeywordNews[currentIndex]?.title
                           : '뉴스를 불러오는 중...'} */}
-                        AI가 분석한 오늘의 핵심 뉴스를 보여드립니다.
+                        금리 인상 공포에 AI 의심...
                       </div>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="rounded-2xl bg-white px-4 py-3 shadow-sm">
                       <div className="text-xs font-semibold text-[#6B9AC4]">
-                        AI 요약률
+                        추천 키워드
                       </div>
                       <div className="mt-2 text-2xl font-bold text-[#2C3E50]">
-                        92%
+                        {HERO_STATS.recommendedKeyword}
                       </div>
                     </div>
                     <div className="rounded-2xl bg-[#F3F8FC] px-4 py-3 shadow-sm">
                       <div className="text-xs font-semibold text-[#5A6A85]">
-                        맞춤 추천
+                        뉴스 개수
                       </div>
                       <div className="mt-2 text-2xl font-bold text-[#2C3E50]">
-                        24h
+                        {animatedNewsCount.toLocaleString('ko-KR')}개
                       </div>
                     </div>
                   </div>
