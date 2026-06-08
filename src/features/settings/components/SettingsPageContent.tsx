@@ -1,11 +1,4 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import {
-  createKeyword,
-  deleteKeywordById,
-  getKeywords,
-  getPopularKeywords,
-} from '@features/keyword/api/keywords'
+import { useState } from 'react'
 import {
   disableStoredFcmToken,
   enableFcmToken,
@@ -21,6 +14,15 @@ import {
   saveNotificationSettings,
 } from '@features/onboarding/model/notificationSettings'
 import OnboardingSectionBox from '@features/onboarding/components/OnboardingSectionBox'
+import {
+  usePopularKeywordsQuery,
+  useUserKeywordsQuery,
+} from '@features/keyword/model/useKeywordQueries'
+import {
+  useCreateKeywordMutation,
+  useDeleteKeywordMutation,
+} from '@features/keyword/model/useKeywordMutations'
+import type { UserKeywordOption } from '@features/news/model/types'
 import type {
   SummaryTime,
   SummaryTimes,
@@ -30,109 +32,41 @@ import Button from '@shared/components/Button'
 import Footer from '@shared/components/Footer'
 import Input from '@shared/components/Input'
 import Header from '@widgets/header/ui/Header'
-
-type SettingsTab = 'keyword' | 'alarm'
+import SettingsPanelWidget, {
+  type SettingsTab,
+} from '@widgets/settings-panel/ui/SettingsPanelWidget'
 
 interface SettingsPageContentProps {
   activeTab: SettingsTab
 }
 
-type KeywordResponseItem =
-  | string
-  | {
-      id?: number
-      keywordId?: number
-      name?: string
-      keyword?: string
-      keywordName?: string
-    }
-
-interface UserKeywordItem {
-  id: number
-  name: string
-}
-
-function normalizeUserKeywords(items?: KeywordResponseItem[]) {
-  if (!Array.isArray(items)) {
-    return []
-  }
-
-  return items
-    .map(item => {
-      if (typeof item === 'string') {
-        return null
-      }
-
-      const id = item.id ?? item.keywordId
-      const name = item.name || item.keywordName || item.keyword
-
-      if (typeof id !== 'number' || !name) {
-        return null
-      }
-
-      return {
-        id,
-        name,
-      }
-    })
-    .filter((keyword): keyword is UserKeywordItem => keyword !== null)
-}
+type UserKeywordItem = UserKeywordOption
 
 function SettingsKeywordTab() {
   const user = useAuthStore(state => state.user)
-  const [selectedKeywords, setSelectedKeywords] = useState<UserKeywordItem[]>(
-    []
-  )
-  const [popularKeywords, setPopularKeywords] = useState<string[]>([])
   const [customKeyword, setCustomKeyword] = useState('')
   const [keywordError, setKeywordError] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [actionError, setActionError] = useState('')
-
-  useEffect(() => {
-    const fetchKeywordData = async () => {
-      if (!user) {
-        setIsLoading(false)
-        setActionError('사용자 정보를 찾을 수 없습니다.')
-        return
-      }
-      setIsLoading(true)
-      setActionError('')
-
-      try {
-        const [keywordsResult, popularResult] = await Promise.all([
-          getKeywords<KeywordResponseItem[]>(),
-          getPopularKeywords<string[]>(),
-        ])
-
-        if (keywordsResult.success === false) {
-          throw new Error(
-            keywordsResult.message || '현재 키워드를 불러오지 못했습니다.'
-          )
-        }
-
-        if (popularResult.success === false) {
-          throw new Error(
-            popularResult.message || '인기 키워드를 불러오지 못했습니다.'
-          )
-        }
-
-        setSelectedKeywords(normalizeUserKeywords(keywordsResult.data))
-        setPopularKeywords(popularResult.data ?? [])
-      } catch (error) {
-        console.error('설정 키워드 조회 실패:', error)
-        setActionError(
-          error instanceof Error
-            ? error.message
-            : '키워드 정보를 불러오지 못했습니다.'
-        )
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    void fetchKeywordData()
-  }, [user])
+  const userKeywordsQuery = useUserKeywordsQuery({
+    enabled: Boolean(user),
+    userId: user?.id,
+  })
+  const popularKeywordsQuery = usePopularKeywordsQuery()
+  const createKeywordMutation = useCreateKeywordMutation()
+  const deleteKeywordMutation = useDeleteKeywordMutation()
+  const selectedKeywords = userKeywordsQuery.data ?? []
+  const popularKeywords = popularKeywordsQuery.data ?? []
+  const isLoading =
+    userKeywordsQuery.isLoading || popularKeywordsQuery.isLoading
+  const isSubmitting = createKeywordMutation.isPending
+  const queryError = userKeywordsQuery.error ?? popularKeywordsQuery.error
+  const visibleActionError =
+    actionError ||
+    (!user
+      ? '사용자 정보를 찾을 수 없습니다.'
+      : queryError instanceof Error
+        ? queryError.message
+        : '')
 
   const handleRemoveKeyword = async (keyword: UserKeywordItem) => {
     if (!user) {
@@ -143,15 +77,7 @@ function SettingsKeywordTab() {
     setActionError('')
 
     try {
-      const result = await deleteKeywordById({
-        keywordId: keyword.id,
-      })
-
-      if (result.success === false) {
-        throw new Error(result.message || '키워드 삭제 중 문제가 발생했습니다.')
-      }
-
-      setSelectedKeywords(prev => prev.filter(item => item.id !== keyword.id))
+      await deleteKeywordMutation.mutateAsync(keyword.id)
     } catch (error) {
       console.error('키워드 삭제 실패:', error)
       setActionError(
@@ -184,26 +110,11 @@ function SettingsKeywordTab() {
       return
     }
 
-    setIsSubmitting(true)
     setKeywordError('')
     setActionError('')
 
     try {
-      const result = await createKeyword({
-        keyword: nextKeyword,
-      })
-      if (result.success === false) {
-        throw new Error(result.message || '키워드 추가 중 문제가 발생했습니다.')
-      }
-
-      const refreshedKeywords = await getKeywords<KeywordResponseItem[]>()
-
-      if (refreshedKeywords.success === false) {
-        throw new Error(
-          refreshedKeywords.message || '추가된 키워드를 불러오지 못했습니다.'
-        )
-      }
-      setSelectedKeywords(normalizeUserKeywords(refreshedKeywords.data))
+      await createKeywordMutation.mutateAsync(nextKeyword)
       setCustomKeyword('')
     } catch (error) {
       console.error('키워드 추가 실패:', error)
@@ -212,8 +123,6 @@ function SettingsKeywordTab() {
           ? error.message
           : '키워드 추가 중 문제가 발생했습니다.'
       )
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
@@ -260,8 +169,8 @@ function SettingsKeywordTab() {
         </div>
       </OnboardingSectionBox>
 
-      {actionError ? (
-        <div className="text-sm text-[#C65B5B]">{actionError}</div>
+      {visibleActionError ? (
+        <div className="text-sm text-[#C65B5B]">{visibleActionError}</div>
       ) : null}
 
       {isLoading ? (
@@ -463,50 +372,11 @@ function SettingsPageContent({ activeTab }: SettingsPageContentProps) {
       <Header />
 
       <main className="flex min-h-[calc(100vh-14rem)] items-center px-4 py-5 sm:px-6 lg:px-8">
-        <section className="mx-auto w-full max-w-205 rounded-[20px] border border-[#DDEAF7] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(120,153,197,0.12)] sm:px-5 sm:py-5 lg:px-6 lg:py-6">
-          <div className="mb-5 text-center sm:mb-6">
-            <div className="inline-flex h-7 items-center rounded-full bg-[#E8F1F9] px-3 text-[12px] font-bold text-[#6A95C1]">
-              설정
-            </div>
-            <div className="mt-3 text-[19px] font-extrabold tracking-tight text-[#33475E] sm:text-[24px]">
-              {activeTab === 'keyword' ? '관심 키워드 설정' : '알림 설정'}
-            </div>
-            <div className="mt-1.5 text-[12px] text-[#7F97B7] sm:text-[13px]">
-              {activeTab === 'keyword'
-                ? '구독할 키워드를 추가하거나 정리해보세요'
-                : '알림 받을 방식을 선택해주세요'}
-            </div>
-          </div>
-
-          <div className="mx-auto mb-5 grid max-w-147 gap-2.5 md:grid-cols-2">
-            <Link
-              to="/setting/keyword"
-              className={`flex h-10 items-center justify-center rounded-xl border text-[14px] font-bold transition-all ${
-                activeTab === 'keyword'
-                  ? 'border-[#729BC5] bg-[#729BC5] text-white shadow-[0_10px_22px_rgba(114,155,197,0.24)]'
-                  : 'border-[#DCE9F6] bg-white text-[#729BC5] hover:bg-[#F8FBFD]'
-              }`}
-            >
-              키워드 관리
-            </Link>
-            <Link
-              to="/setting/alarm"
-              className={`flex h-10 items-center justify-center rounded-xl border text-[14px] font-bold transition-all ${
-                activeTab === 'alarm'
-                  ? 'border-[#729BC5] bg-[#729BC5] text-white shadow-[0_10px_22px_rgba(114,155,197,0.24)]'
-                  : 'border-[#DCE9F6] bg-white text-[#729BC5] hover:bg-[#F8FBFD]'
-              }`}
-            >
-              알림 설정
-            </Link>
-          </div>
-
-          {activeTab === 'keyword' ? (
-            <SettingsKeywordTab />
-          ) : (
-            <SettingsAlarmTab />
-          )}
-        </section>
+        <SettingsPanelWidget
+          activeTab={activeTab}
+          keywordContent={<SettingsKeywordTab />}
+          alarmContent={<SettingsAlarmTab />}
+        />
       </main>
 
       <Footer />

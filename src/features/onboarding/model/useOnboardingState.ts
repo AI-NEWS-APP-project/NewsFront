@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getPopularKeywords } from '@features/keyword/api/keywords'
+import { usePopularKeywordsQuery } from '@features/keyword/model/useKeywordQueries'
 import {
   getNotificationSettings,
   saveNotificationSettings,
@@ -28,9 +28,6 @@ export function useOnboardingState() {
   const storedNotificationSettings = getNotificationSettings()
   const [step, setStep] = useState<OnboardingStep>(1)
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([])
-  const [suggestedKeywords, setSuggestedKeywords] = useState<string[]>([
-    ...FALLBACK_SUGGESTED_KEYWORDS,
-  ])
   const [customKeyword, setCustomKeyword] = useState('')
   const [keywordError, setKeywordError] = useState('')
   const [notifications, setNotifications] = useState({
@@ -40,28 +37,11 @@ export function useOnboardingState() {
   const [summaryTimes, setSummaryTimes] = useState<SummaryTimes>(
     storedNotificationSettings.summaryTimes
   )
-
-  useEffect(() => {
-    const fetchPopularKeywords = async () => {
-      try {
-        const result = await getPopularKeywords<string[]>()
-
-        if (result.success === false) {
-          throw new Error(
-            result.message || '추천 키워드를 불러오지 못했습니다.'
-          )
-        }
-
-        if (Array.isArray(result.data) && result.data.length > 0) {
-          setSuggestedKeywords(result.data)
-        }
-      } catch (error) {
-        console.error('추천 키워드 조회 실패:', error)
-      }
-    }
-
-    void fetchPopularKeywords()
-  }, [])
+  const { data: popularKeywords = [] } = usePopularKeywordsQuery()
+  const suggestedKeywords =
+    popularKeywords.length > 0
+      ? popularKeywords
+      : [...FALLBACK_SUGGESTED_KEYWORDS]
 
   useEffect(() => {
     saveNotificationSettings({

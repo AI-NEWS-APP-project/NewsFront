@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SourceArticleList from '@features/news/components/SourceArticleList'
-import { getKeywordNewsDetailItem } from '@features/news/api/keywordNews'
-import type { KeywordNewsDetail } from '@features/news/model/types'
+import { formatDate } from '@features/news/lib/date'
+import { useKeywordNewsDetailQuery } from '@features/news/model/useNewsDetailQueries'
 import { NewsSummaryIcon } from '@shared/assets/icons'
 import Button from '@shared/components/Button'
 import Footer from '@shared/components/Footer'
@@ -46,61 +45,17 @@ function CalendarGlyph() {
   )
 }
 
-function formatDate(createdAt: string) {
-  const createdDate = new Date(createdAt)
-
-  if (Number.isNaN(createdDate.getTime())) {
-    return createdAt
-  }
-
-  const year = createdDate.getFullYear()
-  const month = String(createdDate.getMonth() + 1).padStart(2, '0')
-  const day = String(createdDate.getDate()).padStart(2, '0')
-
-  return `${year}.${month}.${day}`
-}
-
 export default function NewsDetailPage() {
   const { id } = useParams()
-  const [newsDetail, setNewsDetail] = useState<KeywordNewsDetail | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState('')
-
-  useEffect(() => {
-    const fetchNewsDetail = async () => {
-      if (!id) {
-        setIsLoading(false)
-        setErrorMessage('뉴스 상세 ID가 올바르지 않습니다.')
-        return
-      }
-
-      setIsLoading(true)
-      setErrorMessage('')
-
-      try {
-        const result = await getKeywordNewsDetailItem(id)
-
-        if (result.success === false || !result.data) {
-          throw new Error(
-            result.message || '뉴스 상세 정보를 불러오지 못했습니다.'
-          )
-        }
-
-        setNewsDetail(result.data)
-      } catch (error) {
-        console.error('뉴스 상세 조회 실패:', error)
-        setErrorMessage(
-          error instanceof Error
-            ? error.message
-            : '뉴스 상세 정보를 불러오지 못했습니다.'
-        )
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    void fetchNewsDetail()
-  }, [id])
+  const {
+    data: newsDetail,
+    isLoading,
+    error,
+  } = useKeywordNewsDetailQuery({ id })
+  const errorMessage =
+    error instanceof Error
+      ? error.message
+      : '뉴스 상세 정보를 불러오지 못했습니다.'
 
   return (
     <div className="min-h-screen bg-[#F8FBFD]">

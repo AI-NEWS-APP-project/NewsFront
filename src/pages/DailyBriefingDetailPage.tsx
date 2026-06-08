@@ -1,68 +1,23 @@
-import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SourceArticleList from '@features/news/components/SourceArticleList'
-import { getDailyBriefingDetail } from '@features/news/api/dailyBriefings'
-import type { DailyBriefingDetail } from '@features/news/model/types'
+import { formatDateTime } from '@features/news/lib/date'
+import { useDailyBriefingDetailQuery } from '@features/news/model/useNewsDetailQueries'
 import { NewsSummaryIcon } from '@shared/assets/icons'
 import Button from '@shared/components/Button'
 import Footer from '@shared/components/Footer'
 import Header from '@widgets/header/ui/Header'
 
-function formatDateTime(value: string) {
-  const date = new Date(value)
-
-  if (Number.isNaN(date.getTime())) {
-    return value
-  }
-
-  return new Intl.DateTimeFormat('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date)
-}
-
 export default function DailyBriefingDetailPage() {
   const { id } = useParams()
-  const [briefing, setBriefing] = useState<DailyBriefingDetail | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState('')
-
-  useEffect(() => {
-    const fetchBriefing = async () => {
-      if (!id) {
-        setIsLoading(false)
-        setErrorMessage('브리핑 ID가 올바르지 않습니다.')
-        return
-      }
-
-      setIsLoading(true)
-      setErrorMessage('')
-
-      try {
-        const result = await getDailyBriefingDetail(id)
-
-        if (!result) {
-          throw new Error('일일 브리핑 상세를 불러오지 못했습니다.')
-        }
-
-        setBriefing(result)
-      } catch (error) {
-        console.error('일일 브리핑 상세 조회 실패:', error)
-        setErrorMessage(
-          error instanceof Error
-            ? error.message
-            : '일일 브리핑 상세를 불러오지 못했습니다.'
-        )
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    void fetchBriefing()
-  }, [id])
+  const {
+    data: briefing,
+    isLoading,
+    error,
+  } = useDailyBriefingDetailQuery({ id })
+  const errorMessage =
+    error instanceof Error
+      ? error.message
+      : '일일 브리핑 상세를 불러오지 못했습니다.'
 
   return (
     <div className="min-h-screen bg-[#F8FBFD]">
