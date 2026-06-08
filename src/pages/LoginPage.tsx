@@ -13,7 +13,7 @@ import { hasCompletedOnboarding } from '@features/onboarding/model/onboardingSta
 import { GoogleIcon, KakaoIcon, LockIcon, MailIcon } from '@shared/assets/icons'
 import Button from '@shared/components/Button'
 import Footer from '@shared/components/Footer'
-import Header from '@shared/components/header'
+import Header from '@widgets/header/ui/Header'
 import Input from '@shared/components/Input'
 
 const EMAIL_ICON = <MailIcon className="size-4.5 text-[#5A6A85]" />
