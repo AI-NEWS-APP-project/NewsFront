@@ -1,6 +1,5 @@
 import type { HTMLInputTypeAttribute, ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import Header from '@shared/components/header'
 import Button from '@shared/components/Button'
 import Input from '@shared/components/Input'
 import { signup, getSignupErrorMessage } from '@features/auth/api/signup'
@@ -10,6 +9,7 @@ import {
   type SignupFieldId,
 } from '@features/auth/model/useSignupForm'
 import { CheckIcon, LockIcon, MailIcon, UserIcon } from '@shared/assets/icons'
+import Header from '@widgets/header/ui/Header'
 
 const NAME_ICON = <UserIcon className="size-4.5 text-[#5A6A85]" />
 const EMAIL_ICON = <MailIcon className="size-4.5 text-[#5A6A85]" />
