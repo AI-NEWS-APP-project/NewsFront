@@ -62,6 +62,16 @@ function LoginPage() {
     [resolveRedirectPath]
   )
 
+  const signupPath = (() => {
+    const redirectPath = resolveRedirectPath()
+
+    if (!redirectPath) {
+      return '/signup'
+    }
+
+    return `/signup?${new URLSearchParams({ redirect: redirectPath }).toString()}`
+  })()
+
   const handleEmailChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setEmail(e.target.value)
@@ -308,7 +318,7 @@ function LoginPage() {
               <p className="text-[14px] text-[#5A6A85]">
                 계정이 없으신가요?
                 <span
-                  onClick={() => navigate('/signup')}
+                  onClick={() => navigate(signupPath)}
                   className="ml-2 font-bold text-[#7899C5] hover:cursor-pointer hover:text-[#6688B3]"
                 >
                   회원가입

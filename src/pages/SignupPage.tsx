@@ -1,5 +1,5 @@
 import type { HTMLInputTypeAttribute, ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Header from '@shared/components/header'
 import Button from '@shared/components/Button'
 import Input from '@shared/components/Input'
@@ -61,7 +61,16 @@ const SIGNUP_FIELDS: SignupFieldConfig[] = [
 ]
 
 function SignupPage() {
+  const location = useLocation()
   const navigate = useNavigate()
+  const searchParams = new URLSearchParams(location.search)
+  const redirectPath = searchParams.get('redirect')
+  const loginPath =
+    redirectPath &&
+    redirectPath.startsWith('/') &&
+    !redirectPath.startsWith('//')
+      ? `/login?${new URLSearchParams({ redirect: redirectPath }).toString()}`
+      : '/login'
   const {
     formData,
     errors,
@@ -82,7 +91,7 @@ function SignupPage() {
         throw new Error(getSignupErrorMessage(error))
       }
 
-      navigate('/login')
+      navigate(loginPath)
     },
   })
 
@@ -136,7 +145,7 @@ function SignupPage() {
             <div className="mt-3 text-[14px] text-[#5A6A85]">
               <span>이미 계정이 있으신가요?</span>
               <span
-                onClick={() => navigate('/login')}
+                onClick={() => navigate(loginPath)}
                 className="ml-2 cursor-pointer font-bold text-[#7899C5] hover:cursor-pointer hover:text-[#6688B3]"
               >
                 로그인
